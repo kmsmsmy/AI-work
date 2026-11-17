@@ -22,7 +22,7 @@ import streamlit as st
 from pymatgen.core import Composition
 from sklearn.metrics import mean_absolute_error, r2_score
 
-APP_VERSION = "v29.1"
+APP_VERSION = "v29.2"
 APP_FILE_TAG = APP_VERSION.replace(".", "_")
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -351,6 +351,7 @@ MIDTERM_MENU = {
     "home": "🏠 발표 안내 · 1~2페이지",
     "predict": "🔮 화학식 예측 · 3페이지",
     "simulation": "🧪 조성 시뮬레이션 · 4페이지",
+    "general_substitution": "🧬 범용 원소 치환 · 추가 기능",
     "data_quality": "🧾 반복 측정 분석 · 5~6페이지",
     "evaluation": "🔬 내부 검증 · 7페이지",
     "cv_review": "📈 모델 개선·교차검증 · 8~9페이지",
@@ -365,7 +366,7 @@ if "midterm_nav" not in st.session_state or st.session_state["midterm_nav"] not 
 
 with st.sidebar:
     st.markdown("## 🔋 SSE-AI Lab")
-    st.caption("2차 중간발표 · 발표 순서대로 구성")
+    st.caption(f"2차 중간발표 · 발표 순서대로 구성 · {APP_VERSION}")
     st.divider()
     selected_page = st.radio(
         "발표 화면 선택",
@@ -395,7 +396,7 @@ if selected_page == "home":
     st.subheader("2차 중간발표 | 구현 기능과 모델 검증")
     st.write(
         "**고체전해질의 화학식을 입력하면 이온전도도를 예측하는 AI 웹 앱**입니다. "
-        "이번 발표에서는 지난 발표 이후 구현한 **조성 시뮬레이션, 반복 측정값 분석, "
+        "이번 발표에서는 지난 발표 이후 구현한 **조성 시뮬레이션과 범용 원소 치환, 반복 측정값 분석, "
         "학습 방식 비교와 교차검증**을 실제 화면으로 보여줍니다."
     )
     c1, c2, c3, c4 = st.columns(4)
@@ -409,6 +410,7 @@ if selected_page == "home":
     tasks = [
         ("predict", "1. 화학식으로 전도도 예측", "Li6PS5Cl을 입력하고 '이온전도도 예측'을 누릅니다. AI 추정치와 문헌 측정값을 구별합니다."),
         ("simulation", "2. Cl/Br 치환 21개 조성 비교", "Br 50%를 고르고 21개 조성 분석 버튼을 누릅니다. 곡선은 모델 예측이며 실험값이 아닙니다."),
+        ("general_substitution", "추가. 범용 원소 치환 21개 조성", "Li10Ge(PS6)2를 예시로 치환 원소를 선택해 21개 조성을 예측합니다. 실험·합성 가능성은 보장하지 않습니다."),
         ("data_quality", "3. 같은 조성의 다른 측정값", "원본 데이터 분석 버튼을 누른 뒤 Li6PS5Cl을 검색합니다. 논문별 측정값과 62배 차이를 설명합니다."),
         ("evaluation", "4. 내부 검증과 공식 테스트", "354건 학습·95건 검증과 별도 공식 테스트 109건의 의미를 구분합니다."),
         ("cv_review", "5. A·B·C 학습 방식 교차검증", "조성·논문을 함께 분리한 검증을 골라 MAE·R²를 비교합니다."),
@@ -889,6 +891,24 @@ if selected_page == "evaluation":
         "Extra Trees 모델 선택에 활용된 검증 구간입니다. "
         "새로운 데이터에서의 성능을 보증하는 최종 독립 검증 결과로 소개하면 안 됩니다."
     )
+    st.info(
+        "**내부 검증은 무엇인가요?** 개발용 유효 기록 449건 중 354건으로 v1 모델을 학습하고, "
+        "따로 분리한 95건의 실험값과 예측값을 비교한 개발 단계 점검입니다. "
+        "이 95건은 모델 선정에 이미 참고한 자료이므로 최종 독립 시험이 아닙니다. "
+        "기록된 지표는 MAE(log₁₀) 약 0.596, R² 약 0.776입니다."
+    )
+    st.info(
+        "**OBELiX 공식 테스트는 무엇인가요?** 개발용 기록과 별도로 제공된 121건 중 "
+        "양의 수치이고 지원 원소로 계산할 수 있었던 109건에 기존 v1 모델을 적용한 평가입니다. "
+        "기록된 결과는 MAE(log₁₀) 1.522, R² −0.084입니다. "
+        "R²가 음수이면 단순한 평균 예측보다도 낮은 성능일 수 있습니다. "
+        "이 페이지의 버튼은 공식 테스트를 다시 실행하지 않으며 v2의 공식 테스트는 미평가입니다."
+    )
+    st.caption(
+        "MAE는 예측값과 측정값의 평균 절대 차이로 낮을수록 좋고, R²는 일반적으로 높을수록 좋습니다. "
+        "두 평가의 데이터가 서로 다르므로 수치 차이만으로 원인을 단정할 수 없습니다."
+    )
+
     if not VALID_REFERENCE_PATH.is_file():
         st.info(
             "아직 `SSE_valid_reference.csv`가 없습니다. "
@@ -1396,6 +1416,220 @@ if selected_page == "simulation":
             else:
                 st.info("위 버튼을 누르면 두 AI 모델의 조성별 예측 그래프와 비교표가 나타납니다.")
 
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# v29.2: 범용 원소 치환(동일 원자 자리의 형식적 1:1 치환) 탐색 기능.
+# 기존 Li6PS5Cl1-xBrx 시뮬레이션과 저장 모델/교차검증 파일은 변경하지 않습니다.
+# ─────────────────────────────────────────────────────────────────────────────
+
+def v292_substitution_compositions(base_formula: str, source: str, target: str) -> pd.DataFrame:
+    """0~100%를 5%씩 치환한 21개 화학식 생성. 실제 결정상 또는 전하중성 검증은 별도."""
+    comp = Composition(normalize_user_formula(base_formula))
+    atoms = {str(element): float(amount) for element, amount in comp.get_el_amt_dict().items()}
+    if source not in atoms or atoms[source] <= 0:
+        raise ValueError(f"기본 화학식에 치환할 원소 {source}가 없습니다.")
+    if source == target:
+        raise ValueError("치환 전후 원소가 같습니다. 다른 원소를 선택하세요.")
+    if source not in feature_columns or target not in feature_columns:
+        raise ValueError("치환 원소는 현재 모델에 등록된 지원 원소여야 합니다.")
+    if len(atoms) == 0 or sum(atoms.values()) <= 0:
+        raise ValueError("기본 화학식의 원자 수를 해석할 수 없습니다.")
+
+    base_count = atoms[source]
+    total_atoms = sum(atoms.values())
+    out = []
+    for percent in range(0, 101, 5):
+        fraction = percent / 100.0
+        current = dict(atoms)
+        remain = round(base_count * (1.0 - fraction), 8)
+        added = round(base_count * fraction, 8)
+        if remain <= 0:
+            current.pop(source, None)
+        else:
+            current[source] = remain
+        current[target] = round(current.get(target, 0.0) + added, 8)
+        # 조성의 원소 개수 및 원자 수를 0 이상으로 유지한다.
+        current = {element: amount for element, amount in current.items() if amount > 0}
+        if abs(sum(current.values()) - total_atoms) > 1e-6:
+            raise ValueError("원자 수 보존 검사에 실패했습니다.")
+        # pymatgen의 조성 표현은 표준 원소 파서를 통해 검증한다.
+        def display_amount(value: float) -> str:
+            if abs(value - round(value)) < 1e-8:
+                return "" if round(value) == 1 else str(int(round(value)))
+            return f"{value:.8f}".rstrip("0").rstrip(".")
+        formula = "".join(f"{el}{display_amount(amt)}" for el, amt in current.items())
+        Composition(formula)
+        out.append({
+            "치환 비율 (%)": percent,
+            "기존 원소 잔존 비율 (%)": 100 - percent,
+            "화학식": formula,
+        })
+    return pd.DataFrame(out)
+
+
+def v292_substitution_predict(base_formula: str, source: str, target: str,
+                              model_v2, v2_columns) -> pd.DataFrame:
+    """기존 저장 모델(v1/v2)로만 예측하며 모델을 재학습하지 않습니다."""
+    frame = v292_substitution_compositions(base_formula, source, target)
+    formulas = frame["화학식"].to_list()
+    x1 = pd.concat([make_input(f) for f in formulas], ignore_index=True)
+    x2 = pd.concat([make_input_v2(f, v2_columns) for f in formulas], ignore_index=True)
+    log1 = np.asarray(model.predict(x1), dtype=float)
+    log2 = np.asarray(model_v2.predict(x2), dtype=float)
+    if not (np.isfinite(log1).all() and np.isfinite(log2).all()):
+        raise ValueError("AI 예측 결과에 유효하지 않은 숫자가 있습니다.")
+    frame["v1 log10(S/cm)"] = log1
+    frame["v2 log10(S/cm)"] = log2
+    frame["v1 예측 이온전도도 (S/cm)"] = np.power(10.0, log1)
+    frame["v2 예측 이온전도도 (S/cm)"] = np.power(10.0, log2)
+    if not (np.isfinite(frame["v1 예측 이온전도도 (S/cm)"]).all() and
+            np.isfinite(frame["v2 예측 이온전도도 (S/cm)"]).all()):
+        raise ValueError("예측 이온전도도에 유효하지 않은 수치가 있습니다.")
+    return frame
+
+
+if selected_page == "general_substitution":
+    st.subheader("🧬 범용 원소 치환에 따른 이온전도도 탐색")
+    st.write(
+        "기본 화학식과 치환 전·후 원소를 선택하면 **5% 간격의 가상 조성 21개**를 만들고, "
+        "기존 v1(52개)과 v2(59개) AI 모델의 이온전도도 추정값을 비교합니다. "
+        "예: `Li10Ge(PS6)2`에서 `Ge → Sn` 치환."
+    )
+    st.warning(
+        "**주의:** 이 기능은 원소 자리의 **형식적 1:1 치환**입니다. "
+        "산화수·전하중성·결정상·고용한계·합성 가능성을 검증하지 않습니다. "
+        "그래프의 최대값은 실험으로 검증된 최적 조성이 아니며, "
+        "실제 소재 후보는 구조·안정성·문헌·실험을 별도로 확인해야 합니다."
+    )
+    if not MODEL_V2_PATH.is_file():
+        st.error("두 번째 AI 모델 파일 `SSE_AI_Model_v2.joblib`이 필요합니다.")
+    else:
+        try:
+            gen_model_v2, gen_cols_v2 = load_model_v2()
+        except Exception as exc:
+            st.error(f"v2 모델 로딩 실패: {exc}")
+        else:
+            base_formula = st.text_input(
+                "기본 고체전해질 화학식", value="Li10Ge(PS6)2",
+                help="괄호와 아래첨자를 지원합니다. 예: Li10Ge(PS6)2, Li6PS5Cl",
+                key="v292_base_formula",
+            )
+            try:
+                base_comp = Composition(normalize_user_formula(base_formula))
+                base_elements = [str(el) for el in base_comp.get_el_amt_dict()]
+                missing_base = sorted(set(base_elements) - set(feature_columns))
+                if missing_base:
+                    raise ValueError("현재 모델에 없는 원소: " + ", ".join(missing_base))
+                supported = sorted(set(feature_columns) & _PERIODIC_SYMBOLS)
+                if len(supported) < 2:
+                    raise ValueError("치환 가능한 학습 원소가 충분하지 않습니다.")
+            except Exception as exc:
+                st.error(f"기본 화학식을 확인해주세요: {exc}")
+            else:
+                left, right = st.columns(2)
+                with left:
+                    source_index = base_elements.index("Ge") if "Ge" in base_elements else 0
+                    source = st.selectbox(
+                        "기존 원소 (치환할 원소)", base_elements,
+                        index=source_index, key="v292_source_element",
+                    )
+                with right:
+                    targets = [el for el in supported if el != source]
+                    target_index = targets.index("Sn") if "Sn" in targets else (
+                        targets.index("Si") if "Si" in targets else 0
+                    )
+                    target = st.selectbox(
+                        "새 원소 (대체할 원소)", targets,
+                        index=target_index, key="v292_target_element",
+                    )
+                if "Sn" not in supported and source == "Ge":
+                    st.caption("현재 모델의 지원 원소에 Sn이 없으므로 Sn 대신 지원되는 원소만 선택할 수 있습니다.")
+                selected_pct = st.slider(
+                    "보여줄 치환 비율 (%)", min_value=0, max_value=100,
+                    value=50, step=5, key="v292_selected_pct",
+                )
+                current_signature = (normalize_user_formula(base_formula), source, target)
+                try:
+                    preview = v292_substitution_compositions(base_formula, source, target)
+                    preview_formula = preview.loc[
+                        preview["치환 비율 (%)"] == selected_pct, "화학식"
+                    ].iloc[0]
+                    st.code(preview_formula, language="text")
+                    st.caption(
+                        f"{source}의 원래 원자 자리 중 {selected_pct}%를 {target}로 바꾼 "
+                        "가상 조성입니다. 모델 입력으로 쓰이는 원소 비율만 변경됩니다."
+                    )
+                except Exception as exc:
+                    st.error(f"조성 생성 실패: {exc}")
+
+                if st.button("🧪 범용 치환 21개 조성 예측하기", use_container_width=True, key="v292_run"):
+                    try:
+                        with st.spinner("21개 조성을 기존 AI 두 모델로 예측하고 있습니다..."):
+                            result = v292_substitution_predict(
+                                base_formula, source, target, gen_model_v2, gen_cols_v2
+                            )
+                        st.session_state["v292_result"] = {
+                            "signature": current_signature, "frame": result,
+                        }
+                    except Exception as exc:
+                        st.session_state.pop("v292_result", None)
+                        st.error(f"범용 조성 예측 실패: {exc}")
+
+                stored = st.session_state.get("v292_result")
+                if stored is not None and stored["signature"] != current_signature:
+                    st.info("화학식이나 치환 원소를 변경했습니다. 버튼을 다시 눌러 새로운 결과를 계산하세요.")
+                elif stored is not None:
+                    data = stored["frame"]
+                    point = data.loc[data["치환 비율 (%)"] == selected_pct].iloc[0]
+                    st.markdown("#### 선택한 조성의 AI 예측값")
+                    a, b = st.columns(2)
+                    a.metric("v1 · 52개 특징 (S/cm)", f"{point['v1 예측 이온전도도 (S/cm)']:.4e}")
+                    b.metric("v2 · 59개 특징 (S/cm)", f"{point['v2 예측 이온전도도 (S/cm)']:.4e}")
+                    st.caption(f"선택된 가상 조성: {point['화학식']}")
+
+                    graph = data.melt(
+                        id_vars=["치환 비율 (%)", "화학식"],
+                        value_vars=["v1 log10(S/cm)", "v2 log10(S/cm)"],
+                        var_name="AI 모델", value_name="예측 log₁₀(S/cm)",
+                    )
+                    fig = px.line(
+                        graph, x="치환 비율 (%)", y="예측 log₁₀(S/cm)",
+                        color="AI 모델", markers=True, custom_data=["화학식"],
+                        title=f"{source} → {target} 치환에 따른 AI 예측 이온전도도 변화",
+                    )
+                    fig.add_vline(x=selected_pct, line_dash="dot", line_color="gray")
+                    fig.update_traces(
+                        hovertemplate="치환 비율: %{x:.0f}%<br>예측 log₁₀: %{y:.3f}<br>화학식: %{customdata[0]}<extra>%{fullData.name}</extra>"
+                    )
+                    fig.update_layout(height=410, hovermode="x unified")
+                    st.plotly_chart(fig, use_container_width=True)
+                    st.caption("두 곡선은 모델이 예측한 값이며 실험 측정 곡선이 아닙니다. 로그값 1 차이는 전도도 10배에 해당합니다.")
+                    a, b = st.columns(2)
+                    for col, model_name, axis in [
+                        (a, "v1", "v1 예측 이온전도도 (S/cm)"),
+                        (b, "v2", "v2 예측 이온전도도 (S/cm)"),
+                    ]:
+                        top = data.loc[data[axis].idxmax()]
+                        col.metric(f"{model_name} 최고 예측 치환 비율 · 탐색용", f"{int(top['치환 비율 (%)'])}%")
+                        col.caption(f"{top['화학식']} · {top[axis]:.3e} S/cm")
+                    st.markdown("#### 전체 21개 가상 조성 비교표")
+                    view = data.copy()
+                    for axis in ["v1 예측 이온전도도 (S/cm)", "v2 예측 이온전도도 (S/cm)"]:
+                        view[axis] = view[axis].map(lambda value: f"{value:.4e}")
+                    v29_show_table(
+                        view,
+                        ["치환 비율 (%)", "화학식", "v1 예측 이온전도도 (S/cm)", "v2 예측 이온전도도 (S/cm)"],
+                        key="v292_result_table",
+                    )
+                    st.download_button(
+                        "📥 범용 원소 치환 예측 결과 CSV 다운로드",
+                        data=data.to_csv(index=False).encode("utf-8-sig"),
+                        file_name=f"SSE_AI_{APP_FILE_TAG}_generic_substitution.csv",
+                        mime="text/csv", key="v292_download",
+                    )
+                else:
+                    st.info("위 버튼을 누르면 21개 조성의 AI 예측 그래프와 비교표가 생성됩니다.")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 여덟 번째 메뉴 (v9): 예측값 해석과 학습 조성 유사도 / 모델 간 차이
@@ -2308,57 +2542,92 @@ if selected_page == "data_quality":
             st.caption("상위 60종만 화면에 표시합니다. 다운로드 CSV에는 전체 조성 분석이 포함됩니다.")
 
             st.markdown("#### 3. 특정 조성의 원본 기록과 논문 출처 비교")
+            st.caption(
+                "유효 측정값이 있는 362종 전체에서 원소 비율이 같은 조성을 찾습니다. "
+                "화학식 순서와 괄호 표기가 달라도 같은 원소 비율이면 같은 조성으로 조회합니다. "
+                "반복 측정 여부와 관계없이 검색할 수 있습니다."
+            )
             formula_search = st.text_input(
-                "분석할 화학식 검색 (부분 입력 가능)", value="Li6PS5Cl", key="v12_formula_search"
+                "분석할 화학식 (정확한 조성 검색)",
+                value="Li6PS5Cl",
+                placeholder="예: Li6PS5Cl 또는 Li10Ge(PS6)2",
+                key="v12_formula_search",
             )
-            candidate_indices = [
-                i for i in range(len(repeated))
-                if _plain_formula_characters(formula_search).lower() in str(repeated.iloc[i]["대표 화학식"]).lower()
-            ]
-            if not candidate_indices:
-                st.caption("일치하는 반복 측정 조성이 없어 전체 목록을 표시합니다. 화학식 검색어를 변경해 보세요.")
-                candidate_indices = list(range(len(repeated)))
-            selected_index = st.selectbox(
-                "분석할 조성", options=candidate_indices,
-                format_func=lambda i: (
-                    f"{repeated.iloc[i]['대표 화학식']} · "
-                    f"{int(repeated.iloc[i]['측정 기록 수'])}건 · "
-                    f"최대/최소 {repeated.iloc[i]['측정값 차이 (배)']:.2f}배"
-                ), key="v12_select_formula"
-            )
-            selected = repeated.iloc[selected_index]
-            same_comp = audit_records[audit_records["v12_key"] == selected["v12_key"]].copy()
-            m1, m2, m3 = st.columns(3)
-            m1.metric("문헌 측정 기록", f"{len(same_comp)}건")
-            m2.metric("최댓값/최솟값", f"{selected['측정값 차이 (배)']:.2f}배")
-            m3.metric("로그 중앙값 대표 전도도", f"{selected['대표값: 로그 중앙값 역변환 (S/cm)']:.3e} S/cm")
-            chart_data = same_comp[["v12_log", "v12_numeric", "v12_doi"]].copy().reset_index(drop=True)
-            chart_data["측정 번호"] = [f"측정 {i+1}" for i in range(len(chart_data))]
-            fig = px.scatter(
-                chart_data, x="측정 번호", y="v12_log",
-                hover_data={"v12_numeric": ":.4e", "v12_doi": True},
-                labels={"v12_log": "문헌 측정 이온전도도 log₁₀(S/cm)", "v12_numeric": "실험값 (S/cm)", "v12_doi": "논문 DOI"},
-                title="같은 조성에 대해 기록된 개별 실험 측정값",
-            )
-            fig.update_traces(marker=dict(size=14, color="#26a69a"))
-            fig.add_hline(
-                y=float(selected["로그 중앙값"]), line_dash="dash", line_color="#ffb74d",
-                annotation_text="로그 중앙값"
-            )
-            fig.update_layout(height=350, margin=dict(l=10, r=15, t=55, b=25))
-            st.plotly_chart(fig, use_container_width=True)
+            query_key = None
+            if formula_search.strip():
+                try:
+                    query_key = v12_composition_key(normalize_user_formula(formula_search))
+                except (ValueError, TypeError, KeyError, OverflowError) as exc:
+                    st.error(f"화학식 해석 실패: {exc}")
+            else:
+                st.info("화학식을 입력하면 해당 조성의 실제 학습 측정 기록을 조회합니다.")
 
-            detail_columns = [c for c in ["ID", FORMULA_COL, TARGET_COL, "Family", "Space group", "DOI", "note"] if c in same_comp.columns]
-            detailed = same_comp[detail_columns].copy()
-            if "DOI" in detailed:
-                detailed["논문 링크"] = detailed["DOI"].fillna("").astype(str).map(
-                    lambda d: f"https://doi.org/{d.strip()}" if d.strip().startswith("10.") else ""
-                )
-            st.dataframe(
-                detailed, use_container_width=True, hide_index=True,
-                column_config={"논문 링크": st.column_config.LinkColumn("논문 원문", display_text="원문 보기")}
+            matching = (
+                audit_summary[audit_summary["v12_key"].map(lambda key: key == query_key)]
+                if query_key is not None else audit_summary.iloc[0:0]
             )
-            st.caption("화학식과 전도도가 같더라도 다른 측정 기록일 수 있습니다. 출처/공간군/비고를 함께 확인하세요.")
+            if query_key is not None and matching.empty:
+                st.warning(
+                    "해당 원소 조성의 유효한 양의 수치형 측정 기록이 OBELiX 학습 자료에서 발견되지 않았습니다. "
+                    "이전 검색 결과를 대신 표시하지 않습니다. "
+                    "원본에 값이 없거나 검출한계·비수치 기록만 존재할 수도 있습니다."
+                )
+            elif not matching.empty:
+                selected = matching.iloc[0]
+                same_comp = audit_records[audit_records["v12_key"] == selected["v12_key"]].copy()
+                count = len(same_comp)
+                ratio = float(selected["측정값 차이 (배)"])
+                st.success(f"검색된 조성: {selected['대표 화학식']} · 유효 문헌 측정 기록 {count}건")
+                m1, m2, m3 = st.columns(3)
+                m1.metric("문헌 측정 기록", f"{count}건")
+                m2.metric("최댓값/최솟값", f"{ratio:.2f}배" if count >= 2 else "비교 불가 (1건)")
+                m3.metric(
+                    "로그 중앙값 대표 전도도",
+                    f"{selected['대표값: 로그 중앙값 역변환 (S/cm)']:.3e} S/cm",
+                )
+                if count == 1:
+                    st.caption("측정값이 1건이므로 서로 다른 실험값의 차이를 계산할 수 없습니다. 중앙값은 해당 1건과 같습니다.")
+                else:
+                    st.caption("같은 원소 조성의 문헌 측정값은 서로 달라도 모두 원본 그대로 표시합니다.")
+
+                chart_data = same_comp[["v12_log", "v12_numeric", "v12_doi"]].copy().reset_index(drop=True)
+                chart_data["측정 번호"] = [f"측정 {i + 1}" for i in range(len(chart_data))]
+                fig = px.scatter(
+                    chart_data, x="측정 번호", y="v12_log",
+                    hover_data={"v12_numeric": ":.4e", "v12_doi": True},
+                    labels={
+                        "v12_log": "문헌 측정 이온전도도 log₁₀(S/cm)",
+                        "v12_numeric": "실험값 (S/cm)",
+                        "v12_doi": "논문 DOI",
+                    },
+                    title="해당 조성의 원본 실험 측정값",
+                )
+                fig.update_traces(marker=dict(size=14, color="#26a69a"))
+                fig.add_hline(
+                    y=float(selected["로그 중앙값"]),
+                    line_dash="dash", line_color="#ffb74d", annotation_text="로그 중앙값",
+                )
+                fig.update_layout(height=350, margin=dict(l=10, r=15, t=55, b=25))
+                st.plotly_chart(fig, use_container_width=True)
+
+                detail_columns = [
+                    c for c in ["ID", FORMULA_COL, TARGET_COL, "Family", "Space group", "DOI", "note"]
+                    if c in same_comp.columns
+                ]
+                detailed = same_comp[detail_columns].copy()
+                if "DOI" in detailed.columns:
+                    detailed["논문 링크"] = detailed["DOI"].fillna("").astype(str).map(
+                        lambda doi: f"https://doi.org/{doi.strip()}" if doi.strip().startswith("10.") else ""
+                    )
+                config = (
+                    {"논문 링크": st.column_config.LinkColumn("논문 원문", display_text="원문 보기")}
+                    if "논문 링크" in detailed.columns else {}
+                )
+                st.dataframe(detailed, use_container_width=True, hide_index=True, column_config=config)
+                st.caption(
+                    "문헌 실험 측정값과 논문 출처를 보여주는 분석 화면입니다. "
+                    "AI 예측값이나 동일한 결정구조라는 증거는 아닙니다."
+                )
 
         st.divider()
         st.markdown("#### 4. 현재 모델은 이 차이를 어떻게 처리하나?")
@@ -2488,6 +2757,12 @@ if selected_page == "cv_review":
         "- **학습·검증 분리 개선:** 기존 내부 검증에서 학습과 겹친 조성 5종(검증 기록 8건)을 발견했습니다. "
         "이번에는 조성 단위와 조성·논문 연결 그룹 단위로 분리해 비교했습니다.\n"
         "- **예측 성능 개선 시도:** 반복값을 로그 중앙값으로 요약하는 방법과 원소 물성 특징 추가 방법을 검증했습니다."
+    )
+    st.info(
+        "**내부 검증과 이번 5겹 교차검증의 차이**: 기존의 95건 내부 검증은 한 번 나눈 자료에서의 개발 중 점검입니다. "
+        "여기서는 학습용 449건을 다섯 묶음으로 반복 평가하고, 같은 원소 조성 또는 논문(DOI)으로 연결된 "
+        "기록이 학습·검증에 동시에 나타나지 않게 분리할 수 있습니다. "
+        "화면의 수치는 당시 Colab에서 수행한 실험 기록이며 현재 저장된 모델을 이 페이지에서 재학습하지 않습니다."
     )
     with st.expander("A·B·C 모델과 지표를 쉽게 설명하면?"):
         st.write("**A**: 52개 원소 조성비로 각각의 측정 기록을 학습합니다.")
@@ -2661,6 +2936,17 @@ if selected_page == "structure":
     st.subheader('🧬 결정구조 정보와 구조 기반 예측 가능성')
     st.write('기존 AI는 **화학식만**으로 예측합니다. 구조 기반 모델은 공간군이나 격자 정보를 **실제로 알고 있을 때만** 적용할 수 있는 별도 연구 방향입니다.')
     st.info('이 페이지는 **논문에 연결된 구조 기록과 기존 교차검증 결과를 조회하는 도구**입니다. 구조 기반 신규 모델을 실제 예측에 연결한 것은 아니며, 현재 AI 모델 파일도 변경되지 않았습니다.')
+    st.markdown(
+        "**이 화면의 네 가지 기능**: "
+        "① 구조 데이터 수집·CIF 상태 파악 → "
+        "② 화학식별 공간군·격자상수·논문 출처 조회 → "
+        "③ 구조 특징을 추가한 A/B 모델들의 기존 5겹 교차검증 결과 비교 → "
+        "④ 실제 시료의 구조 기반 예측을 위한 조건 확인"
+    )
+    st.caption(
+        "이 메뉴는 구조 기록을 조회하고 과거 검증 결과를 보여줍니다. "
+        "구조 기반 이온전도도 예측을 여기서 직접 계산하는 메뉴는 아닙니다."
+    )
     try:
         v27_catalog, v27_cv, v27_folds = v27_load_structure_data()
     except Exception as v27_exc:
