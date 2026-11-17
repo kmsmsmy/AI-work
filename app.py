@@ -22,7 +22,7 @@ import streamlit as st
 from pymatgen.core import Composition
 from sklearn.metrics import mean_absolute_error, r2_score
 
-APP_VERSION = "v29.3"
+APP_VERSION = "v29.4"
 APP_FILE_TAG = APP_VERSION.replace(".", "_")
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -1483,8 +1483,9 @@ def v292_substitution_predict(base_formula: str, source: str, target: str,
     return frame
 
 
-# v29.3: 한 개의 메뉴에서 기존 Cl/Br 및 범용 원소 치환을 모두 실행합니다.
-def v293_apply_substitution_preset():
+# v29.4: '직접 입력'은 예시를 그대로 보여주지 않고 빈 입력란에서 시작합니다.
+# 기존 예시 2개는 그대로 유지하며, 선택을 바꿀 때 이전 결과도 초기화합니다.
+def v294_apply_substitution_preset():
     preset = st.session_state.get("v293_sim_preset", "Cl → Br · PPT 사례")
     defaults = {
         "Cl → Br · PPT 사례": ("Li6PS5Cl", "Cl", "Br"),
@@ -1495,22 +1496,33 @@ def v293_apply_substitution_preset():
         st.session_state["v292_base_formula"] = base
         st.session_state["v292_source_element"] = old
         st.session_state["v292_target_element"] = new
-        st.session_state["v292_selected_pct"] = 50
+    elif preset == "직접 입력":
+        # 실제 사용자가 자신만의 화학식부터 입력할 수 있도록 모든 예시를 비웁니다.
+        st.session_state["v292_base_formula"] = ""
+        st.session_state.pop("v292_source_element", None)
+        st.session_state.pop("v292_target_element", None)
+    st.session_state["v292_selected_pct"] = 50
+    st.session_state["v294_sim_applied"] = preset
     st.session_state.pop("v292_result", None)
 
 
 if selected_page == "simulation":
     st.subheader("🧪 조성 변경 시뮬레이션")
-    st.write("기본 화학식에서 원소를 바꿔 5% 간격의 가상 조성 21개를 만들고, 두 AI 모델의 전도도 예측 경향을 비교합니다.")
-    if "v293_sim_initialized" not in st.session_state:
+    st.write("화학식과 치환 원소를 선택하면 5% 간격의 가상 조성 21개에 대해 AI 예측 경향을 비교합니다.")
+    if "v293_sim_preset" not in st.session_state:
         st.session_state["v293_sim_preset"] = "Cl → Br · PPT 사례"
-        st.session_state["v293_sim_initialized"] = True
-        v293_apply_substitution_preset()
+    # v29.3에서 업데이트한 기존 세션도 새 모드 초기화를 한 번 거칩니다.
+    if st.session_state.get("v294_sim_applied") != st.session_state["v293_sim_preset"]:
+        v294_apply_substitution_preset()
     st.radio(
         "예시 선택", ["Cl → Br · PPT 사례", "Ge → Sn · 추가 사례", "직접 입력"],
-        horizontal=True, key="v293_sim_preset", on_change=v293_apply_substitution_preset,
+        horizontal=True, key="v293_sim_preset", on_change=v294_apply_substitution_preset,
     )
-    st.caption("원소를 자유롭게 선택하려면 '직접 입력'을 선택하고 아래 화학식과 원소를 변경하세요.")
+    chosen_mode = st.session_state["v293_sim_preset"]
+    if chosen_mode == "직접 입력":
+        st.info("**직접 입력 모드:** 아래 빈칸에 원하는 화학식을 입력하세요. 그다음 치환할 기존 원소와 새 원소를 직접 선택합니다. (예: Li3PS4)")
+    else:
+        st.caption("선택한 예시의 화학식과 치환 원소가 자동 설정됐습니다. 직접 수정하려면 '직접 입력'을 선택하세요.")
     with st.expander("시뮬레이션의 한계 · 꼭 알아둘 점", expanded=False):
         st.write("원자 자리를 형식적으로 1:1 치환합니다. 산화수·전하 중성·고용한계·결정상·합성 가능성은 검증하지 않습니다.")
         st.write("예측 최고점은 21개 가상 조성 중 모델 추정이 가장 큰 지점이며, 실험으로 검증된 최적 소재가 아닙니다.")
@@ -1524,10 +1536,15 @@ if selected_page == "simulation":
             st.error(f"v2 모델 로딩 실패: {exc}")
         else:
             base_formula = st.text_input(
-                "기본 고체전해질 화학식", value="Li6PS5Cl",
-                help="괄호와 아래첨자를 지원합니다. 예: Li10Ge(PS6)2, Li6PS5Cl",
+                "기본 고체전해질 화학식",
+                placeholder="예: Li3PS4 또는 Li10Ge(PS6)2",
+                help="괄호와 아래첨자를 지원합니다. 직접 입력에서는 빈칸에서 시작합니다.",
                 key="v292_base_formula",
             )
+            if not base_formula.strip():
+                # 직접 입력 모드가 비어 있을 땐 잘못된 화학식 경고나 예시 예측을 표시하지 않습니다.
+                st.info("화학식을 입력하면 치환 원소 선택과 21개 조성 예측 기능이 표시됩니다.")
+                st.stop()
             try:
                 base_comp = Composition(normalize_user_formula(base_formula))
                 base_elements = [str(el) for el in base_comp.get_el_amt_dict()]
@@ -3276,4 +3293,4 @@ if selected_page == "readiness":
 
 
 st.divider()
-st.caption("SSE-AI Lab v29.3 · 연구용 참고 도구 | 예측값은 실험값이 아니며 예측 정확도가 보장되지 않습니다.")
+st.caption("SSE-AI Lab v29.4 · 연구용 참고 도구 | 예측값은 실험값이 아니며 예측 정확도가 보장되지 않습니다.")
