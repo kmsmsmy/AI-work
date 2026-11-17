@@ -22,7 +22,7 @@ import streamlit as st
 from pymatgen.core import Composition
 from sklearn.metrics import mean_absolute_error, r2_score
 
-APP_VERSION = "v29.2"
+APP_VERSION = "v29.3"
 APP_FILE_TAG = APP_VERSION.replace(".", "_")
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -38,8 +38,8 @@ FORMULA_COL = "Reduced Composition"
 
 st.set_page_config(page_title="SSE-AI Lab | 2차 중간발표", page_icon="🔋", layout="wide", initial_sidebar_state="expanded")
 st.title("🔋 SSE-AI Lab")
-st.caption("고체전해질 이온전도도 예측 · 데이터 분석 · AI 모델 교차검증 | 2차 중간발표 시연용")
-st.info("이 웹 앱은 고체전해질 후보 탐색용 연구 도구입니다. AI 예측값은 실험 측정값이 아니며 정확도가 보장되지 않습니다.")
+st.caption("고체전해질 이온전도도 예측 · 조성 탐색 · 문헌 분석 · 모델 검증")
+st.caption("연구용 참고 도구입니다. AI 예측값은 실험 측정값이 아니며 정확도가 보장되지 않습니다.")
 
 
 
@@ -348,21 +348,16 @@ if "db_opened" not in st.session_state:
 # 이번 발표에서 직접 설명하는 기능 + 질문에 대비한 문헌 검색/소재 추천만 노출합니다.
 # 실험용 구조 예측/최종 배포 점검/보고서 메뉴는 기존 코드에 보존하되 발표 화면에서는 숨깁니다.
 MIDTERM_MENU = {
-    "home": "🏠 발표 안내 · 1~2페이지",
-    "predict": "🔮 화학식 예측 · 3페이지",
-    "simulation": "🧪 조성 시뮬레이션 · 4페이지",
-    "general_substitution": "🧬 범용 원소 치환 · 추가 기능",
-    "data_quality": "🧾 반복 측정 분석 · 5~6페이지",
-    "evaluation": "🔬 내부 검증 · 7페이지",
-    "cv_review": "📈 모델 개선·교차검증 · 8~9페이지",
-    "structure": "🧬 결정구조 비교 · 10페이지",
-    "database": "📚 논문 데이터 검색 · 참고 시연",
-    "recommend": "🏆 소재 후보 추천 · 참고 시연",
+    "predict": "🔮 AI 이온전도도 예측",
+    "simulation": "🧪 조성 변경 시뮬레이션",
+    "data_quality": "🧾 문헌 측정값 분석",
+    "validation": "📈 AI 모델 성능 검증",
+    "structure": "🧬 결정구조 분석",
 }
 V12_MENU = MIDTERM_MENU
 
 if "midterm_nav" not in st.session_state or st.session_state["midterm_nav"] not in MIDTERM_MENU:
-    st.session_state["midterm_nav"] = "home"
+    st.session_state["midterm_nav"] = "predict"
 
 with st.sidebar:
     st.markdown("## 🔋 SSE-AI Lab")
@@ -376,15 +371,14 @@ with st.sidebar:
         label_visibility="collapsed",
     )
     st.divider()
-    st.caption("**발표용 데이터 상태**")
-    st.caption("✅ 52개 조성 특징 모델 연결")
-    st.caption("✅ 59개 조성·물성 모델" if MODEL_V2_PATH.is_file() else "⚠️ 두 번째 AI 모델 파일 필요")
-    st.caption("✅ 원본 측정 CSV" if DATABASE_PATH.is_file() else "ℹ️ 원본 CSV: 최초 사용 시 온라인 불러오기")
-    st.caption("✅ 5겹 교차검증 결과" if (BASE_DIR / "SSE_v14_cv_summary.csv").is_file() else "⚠️ 교차검증 결과 CSV 필요")
-    with st.expander("🎤 발표 시 유의할 점"):
-        st.write("시뮬레이션은 **21개 가상 조성의 예측 경향**을 비교합니다. 실제 합성·측정 결과가 아닙니다.")
-        st.write("유사도 100%는 **화학식의 원소 비율이 같다**는 뜻으로, 정확도 100%가 아닙니다.")
-        st.write("교차검증은 **저장된 모델의 독립 성능 인증**이 아니라, 별도로 수행한 개발 데이터 실험입니다.")
+    st.caption("2차 중간발표 · 핵심 기능 5개")
+    with st.expander("ℹ️ 데이터·모델 상태와 주의사항", expanded=False):
+        st.caption("52개 원소 조성 특징 모델 연결")
+        st.caption("59개 특징 모델 연결" if MODEL_V2_PATH.is_file() else "⚠️ v2 모델 파일 필요")
+        st.caption("원본 측정 CSV 사용 가능" if DATABASE_PATH.is_file() else "원본 CSV는 최초 실행 시 불러옵니다")
+        st.caption("5겹 교차검증 결과 사용 가능" if (BASE_DIR / "SSE_v14_cv_summary.csv").is_file() else "⚠️ 교차검증 CSV 필요")
+        st.write("가상 치환의 최고 예측값은 실제 합성 가능성이나 실험 최적 조성을 의미하지 않습니다.")
+        st.write("학습 조성 유사도 및 모델 간 차이는 예측 정확도 확률이 아닙니다.")
 
 
 def v12_go_to(page_id: str):
@@ -435,6 +429,7 @@ if selected_page == "home":
     )
 
 if selected_page == "predict":
+    st.write("화학식을 입력하면 기존 AI 모델이 이온전도도를 예측합니다. 여러 소재를 예측하면 아래에서 비교할 수 있습니다.")
     left, right = st.columns([2, 1], gap="large")
     with left:
         st.subheader("1. 화학식 입력 및 AI 예측")
@@ -507,14 +502,15 @@ if selected_page == "predict":
         st.plotly_chart(fig, use_container_width=True)
         st.caption("오른쪽에 있는 점일수록 예측 이온전도도가 높습니다. 점 옆에는 실제 S/cm 단위의 예측값을 표기했습니다.")
 
-        st.download_button(
-            "📥 예측 결과 CSV 저장",
-            data=data.to_csv(index=False).encode("utf-8-sig"),
-            file_name="SSE_AI_predictions.csv", mime="text/csv",
-        )
-        if st.button("🗑️ 비교 목록 지우기"):
-            st.session_state.results = []
-            st.rerun()
+        with st.expander("결과 저장·비교 목록 관리", expanded=False):
+            st.download_button(
+                "📥 예측 결과 CSV 저장",
+                data=data.to_csv(index=False).encode("utf-8-sig"),
+                file_name="SSE_AI_predictions.csv", mime="text/csv",
+            )
+            if st.button("🗑️ 비교 목록 지우기"):
+                st.session_state.results = []
+                st.rerun()
     else:
         st.caption("화학식을 예측하면 이곳에 비교표와 그래프가 나타납니다.")
 
@@ -880,34 +876,30 @@ if selected_page == "analysis":
             st.code(str(exc))
             st.caption("처음 분석할 때는 OBELiX 공식 학습 데이터를 다운로드할 수 있도록 인터넷 연결이 필요합니다.")
 
-if selected_page == "evaluation":
+if selected_page == "validation":
+    st.subheader("📈 AI 모델 성능 검증")
+    st.caption("내부 검증·공식 테스트·교차검증은 평가 자료와 목적이 다르므로 숫자만으로 모델 순위를 판단하지 않습니다.")
+    vcol1, vcol2, vcol3 = st.columns(3)
+    vcol1.metric("과거 내부 검증 MAE", "0.596", help="기존 v1 모델 · 개발 과정의 95건")
+    vcol2.metric("과거 공식 테스트 MAE", "1.522", help="기존 v1 모델 · 별도 평가 가능 109건")
+    vcol3.metric("교차검증 A 모델 MAE", "1.289", help="개발용 449건 · 조성+DOI 연결 분리")
+    st.caption("세 수치는 서로 다른 검증 절차의 기록이며 동일한 테스트 데이터에서 얻은 직접 비교 결과가 아닙니다.")
+    validation_view = st.radio(
+        "확인할 검증 결과", ["cv", "internal"],
+        format_func=lambda v: "A·B·C 교차검증" if v == "cv" else "기존 모델 내부 검증 · 공식 테스트 설명",
+        horizontal=True, key="v293_validation_view",
+    )
+    st.divider()
+
+if selected_page == "validation" and validation_view == "internal":
     st.subheader("🧪 검증 데이터의 실제값과 AI 예측값 비교")
-    st.write(
-        "Colab에서 **검증용으로 분리한 95건**의 측정값과 AI 예측값을 비교합니다. "
-        "이 95건은 모델을 고르는 과정에서 이미 참고한 자료이므로 **최종 독립 테스트셋이 아닙니다.**"
-    )
-    st.warning(
-        "여기 표시하는 MAE·R²는 학습 데이터 밖의 검증 결과지만, "
-        "Extra Trees 모델 선택에 활용된 검증 구간입니다. "
-        "새로운 데이터에서의 성능을 보증하는 최종 독립 검증 결과로 소개하면 안 됩니다."
-    )
-    st.info(
-        "**내부 검증은 무엇인가요?** 개발용 유효 기록 449건 중 354건으로 v1 모델을 학습하고, "
-        "따로 분리한 95건의 실험값과 예측값을 비교한 개발 단계 점검입니다. "
-        "이 95건은 모델 선정에 이미 참고한 자료이므로 최종 독립 시험이 아닙니다. "
-        "기록된 지표는 MAE(log₁₀) 약 0.596, R² 약 0.776입니다."
-    )
-    st.info(
-        "**OBELiX 공식 테스트는 무엇인가요?** 개발용 기록과 별도로 제공된 121건 중 "
-        "양의 수치이고 지원 원소로 계산할 수 있었던 109건에 기존 v1 모델을 적용한 평가입니다. "
-        "기록된 결과는 MAE(log₁₀) 1.522, R² −0.084입니다. "
-        "R²가 음수이면 단순한 평균 예측보다도 낮은 성능일 수 있습니다. "
-        "이 페이지의 버튼은 공식 테스트를 다시 실행하지 않으며 v2의 공식 테스트는 미평가입니다."
-    )
-    st.caption(
-        "MAE는 예측값과 측정값의 평균 절대 차이로 낮을수록 좋고, R²는 일반적으로 높을수록 좋습니다. "
-        "두 평가의 데이터가 서로 다르므로 수치 차이만으로 원인을 단정할 수 없습니다."
-    )
+    st.write("개발 기록 449건을 354건 학습·95건 검증으로 나누어, 기존 모델의 실험값과 예측값을 비교합니다.")
+    st.caption("내부 검증 MAE 0.596 · R² 0.776 / 별도 공식 테스트(평가 가능 109건) MAE 1.522 · R² −0.084")
+    with st.expander("내부 검증과 공식 테스트의 차이 · 지표 설명", expanded=False):
+        st.write("**내부 검증:** 개발 과정에서 모델을 고를 때 참고한 95건의 평가입니다. 최종 독립 테스트가 아닙니다.")
+        st.write("**공식 테스트:** OBELiX의 별도 테스트 121건 중 평가 가능한 109건에 대해 기존 v1을 평가했던 기록입니다. 이 화면에서 재실행하지 않으며 v2의 공식 테스트는 미평가입니다.")
+        st.write("**MAE(log₁₀):** 실험값과 예측값 사이의 평균 절대 로그 오차이며 낮을수록 좋습니다. **R²:** 일반적으로 높을수록 좋고 음수일 수도 있습니다.")
+        st.warning("서로 다른 평가 데이터이므로 MAE 차이의 원인을 수치만으로 단정할 수 없으며, 내부 검증으로 신규 소재의 정확도를 보장할 수 없습니다.")
 
     if not VALID_REFERENCE_PATH.is_file():
         st.info(
@@ -981,21 +973,23 @@ if selected_page == "evaluation":
         fig_v.add_shape(type="line", x0=lo, y0=lo, x1=hi, y1=hi,
                         line=dict(color="gray", dash="dash", width=2))
         st.plotly_chart(fig_v, use_container_width=True)
-        st.markdown("#### 예측 오차가 큰 소재 TOP 10")
-        top_errors = eval_df.sort_values("절대오차 (log10)", ascending=False).head(10)
-        top_view = top_errors.copy()
-        # 원본 수치는 그대로 보존하고 화면에 보여주는 값만 지수 표기로 변환한다.
-        for field in ["문헌 측정값 (S/cm)", "AI 예측값 (S/cm)"]:
-            top_view[field] = top_view[field].map(lambda x: f"{x:.3e}")
-        for field in ["실제 log10", "예측 log10", "절대오차 (log10)"]:
-            top_view[field] = top_view[field].map(lambda x: f"{x:.3f}")
-        st.dataframe(top_view, use_container_width=True, hide_index=True)
-        st.caption("표의 이온전도도는 과학적 표기법으로 표시했습니다. CSV에는 계산에 사용한 원본 숫자가 저장됩니다.")
-        st.download_button(
-            "📥 검증 결과 CSV 다운로드",
-            data=eval_df.to_csv(index=False).encode("utf-8-sig"),
-            file_name="SSE_AI_validation_results.csv", mime="text/csv",
-        )
+        with st.expander("오차가 큰 소재 TOP 10", expanded=False):
+            st.markdown("#### 예측 오차가 큰 소재 TOP 10")
+            top_errors = eval_df.sort_values("절대오차 (log10)", ascending=False).head(10)
+            top_view = top_errors.copy()
+            # 원본 수치는 그대로 보존하고 화면에 보여주는 값만 지수 표기로 변환한다.
+            for field in ["문헌 측정값 (S/cm)", "AI 예측값 (S/cm)"]:
+                top_view[field] = top_view[field].map(lambda x: f"{x:.3e}")
+            for field in ["실제 log10", "예측 log10", "절대오차 (log10)"]:
+                top_view[field] = top_view[field].map(lambda x: f"{x:.3f}")
+            st.dataframe(top_view, use_container_width=True, hide_index=True)
+            st.caption("표의 이온전도도는 과학적 표기법으로 표시했습니다. CSV에는 계산에 사용한 원본 숫자가 저장됩니다.")
+        with st.expander("검증 데이터 결과 저장", expanded=False):
+            st.download_button(
+                "📥 검증 결과 CSV 다운로드",
+                data=eval_df.to_csv(index=False).encode("utf-8-sig"),
+                file_name="SSE_AI_validation_results.csv", mime="text/csv",
+            )
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 여섯 번째 메뉴: 기존 52개 모델 vs 물리특성 59개 모델
@@ -1293,7 +1287,7 @@ def run_halide_sweep(model_v2, v2_columns):
     })
 
 
-if selected_page == "simulation":
+if selected_page == "_legacy_halide":
     st.subheader("🧪 Cl/Br 치환 비율에 따른 이온전도도 시뮬레이션")
     st.write(
         "**Li₆PS₅Cl₁₋ₓBrₓ**의 Cl을 Br로 치환하는 비율을 바꿔가며 "
@@ -1489,19 +1483,38 @@ def v292_substitution_predict(base_formula: str, source: str, target: str,
     return frame
 
 
-if selected_page == "general_substitution":
-    st.subheader("🧬 범용 원소 치환에 따른 이온전도도 탐색")
-    st.write(
-        "기본 화학식과 치환 전·후 원소를 선택하면 **5% 간격의 가상 조성 21개**를 만들고, "
-        "기존 v1(52개)과 v2(59개) AI 모델의 이온전도도 추정값을 비교합니다. "
-        "예: `Li10Ge(PS6)2`에서 `Ge → Sn` 치환."
+# v29.3: 한 개의 메뉴에서 기존 Cl/Br 및 범용 원소 치환을 모두 실행합니다.
+def v293_apply_substitution_preset():
+    preset = st.session_state.get("v293_sim_preset", "Cl → Br · PPT 사례")
+    defaults = {
+        "Cl → Br · PPT 사례": ("Li6PS5Cl", "Cl", "Br"),
+        "Ge → Sn · 추가 사례": ("Li10Ge(PS6)2", "Ge", "Sn"),
+    }
+    if preset in defaults:
+        base, old, new = defaults[preset]
+        st.session_state["v292_base_formula"] = base
+        st.session_state["v292_source_element"] = old
+        st.session_state["v292_target_element"] = new
+        st.session_state["v292_selected_pct"] = 50
+    st.session_state.pop("v292_result", None)
+
+
+if selected_page == "simulation":
+    st.subheader("🧪 조성 변경 시뮬레이션")
+    st.write("기본 화학식에서 원소를 바꿔 5% 간격의 가상 조성 21개를 만들고, 두 AI 모델의 전도도 예측 경향을 비교합니다.")
+    if "v293_sim_initialized" not in st.session_state:
+        st.session_state["v293_sim_preset"] = "Cl → Br · PPT 사례"
+        st.session_state["v293_sim_initialized"] = True
+        v293_apply_substitution_preset()
+    st.radio(
+        "예시 선택", ["Cl → Br · PPT 사례", "Ge → Sn · 추가 사례", "직접 입력"],
+        horizontal=True, key="v293_sim_preset", on_change=v293_apply_substitution_preset,
     )
-    st.warning(
-        "**주의:** 이 기능은 원소 자리의 **형식적 1:1 치환**입니다. "
-        "산화수·전하중성·결정상·고용한계·합성 가능성을 검증하지 않습니다. "
-        "그래프의 최대값은 실험으로 검증된 최적 조성이 아니며, "
-        "실제 소재 후보는 구조·안정성·문헌·실험을 별도로 확인해야 합니다."
-    )
+    st.caption("원소를 자유롭게 선택하려면 '직접 입력'을 선택하고 아래 화학식과 원소를 변경하세요.")
+    with st.expander("시뮬레이션의 한계 · 꼭 알아둘 점", expanded=False):
+        st.write("원자 자리를 형식적으로 1:1 치환합니다. 산화수·전하 중성·고용한계·결정상·합성 가능성은 검증하지 않습니다.")
+        st.write("예측 최고점은 21개 가상 조성 중 모델 추정이 가장 큰 지점이며, 실험으로 검증된 최적 소재가 아닙니다.")
+
     if not MODEL_V2_PATH.is_file():
         st.error("두 번째 AI 모델 파일 `SSE_AI_Model_v2.joblib`이 필요합니다.")
     else:
@@ -1511,7 +1524,7 @@ if selected_page == "general_substitution":
             st.error(f"v2 모델 로딩 실패: {exc}")
         else:
             base_formula = st.text_input(
-                "기본 고체전해질 화학식", value="Li10Ge(PS6)2",
+                "기본 고체전해질 화학식", value="Li6PS5Cl",
                 help="괄호와 아래첨자를 지원합니다. 예: Li10Ge(PS6)2, Li6PS5Cl",
                 key="v292_base_formula",
             )
@@ -1529,16 +1542,20 @@ if selected_page == "general_substitution":
             else:
                 left, right = st.columns(2)
                 with left:
-                    source_index = base_elements.index("Ge") if "Ge" in base_elements else 0
+                    if st.session_state.get("v292_source_element") not in base_elements:
+                        st.session_state["v292_source_element"] = base_elements[0]
+                    source_index = base_elements.index("Cl") if "Cl" in base_elements else 0
                     source = st.selectbox(
                         "기존 원소 (치환할 원소)", base_elements,
                         index=source_index, key="v292_source_element",
                     )
                 with right:
                     targets = [el for el in supported if el != source]
-                    target_index = targets.index("Sn") if "Sn" in targets else (
-                        targets.index("Si") if "Si" in targets else 0
-                    )
+                    if st.session_state.get("v292_target_element") not in targets:
+                        st.session_state["v292_target_element"] = (
+                            "Br" if "Br" in targets else ("Sn" if "Sn" in targets else targets[0])
+                        )
+                    target_index = targets.index(st.session_state["v292_target_element"])
                     target = st.selectbox(
                         "새 원소 (대체할 원소)", targets,
                         index=target_index, key="v292_target_element",
@@ -1563,7 +1580,7 @@ if selected_page == "general_substitution":
                 except Exception as exc:
                     st.error(f"조성 생성 실패: {exc}")
 
-                if st.button("🧪 범용 치환 21개 조성 예측하기", use_container_width=True, key="v292_run"):
+                if st.button("🔬 21개 가상 조성 예측하기", use_container_width=True, key="v292_run"):
                     try:
                         with st.spinner("21개 조성을 기존 AI 두 모델로 예측하고 있습니다..."):
                             result = v292_substitution_predict(
@@ -1611,23 +1628,24 @@ if selected_page == "general_substitution":
                         (b, "v2", "v2 예측 이온전도도 (S/cm)"),
                     ]:
                         top = data.loc[data[axis].idxmax()]
-                        col.metric(f"{model_name} 최고 예측 치환 비율 · 탐색용", f"{int(top['치환 비율 (%)'])}%")
+                        col.metric(f"{model_name} · 전체 21개 중 최고 예측 비율", f"{int(top['치환 비율 (%)'])}%")
                         col.caption(f"{top['화학식']} · {top[axis]:.3e} S/cm")
-                    st.markdown("#### 전체 21개 가상 조성 비교표")
-                    view = data.copy()
-                    for axis in ["v1 예측 이온전도도 (S/cm)", "v2 예측 이온전도도 (S/cm)"]:
-                        view[axis] = view[axis].map(lambda value: f"{value:.4e}")
-                    v29_show_table(
-                        view,
-                        ["치환 비율 (%)", "화학식", "v1 예측 이온전도도 (S/cm)", "v2 예측 이온전도도 (S/cm)"],
-                        key="v292_result_table",
-                    )
-                    st.download_button(
-                        "📥 범용 원소 치환 예측 결과 CSV 다운로드",
-                        data=data.to_csv(index=False).encode("utf-8-sig"),
-                        file_name=f"SSE_AI_{APP_FILE_TAG}_generic_substitution.csv",
-                        mime="text/csv", key="v292_download",
-                    )
+                    with st.expander("전체 21개 가상 조성·CSV 다운로드", expanded=False):
+                        st.markdown("#### 전체 21개 가상 조성 비교표")
+                        view = data.copy()
+                        for axis in ["v1 예측 이온전도도 (S/cm)", "v2 예측 이온전도도 (S/cm)"]:
+                            view[axis] = view[axis].map(lambda value: f"{value:.4e}")
+                        v29_show_table(
+                            view,
+                            ["치환 비율 (%)", "화학식", "v1 예측 이온전도도 (S/cm)", "v2 예측 이온전도도 (S/cm)"],
+                            key="v292_result_table",
+                        )
+                        st.download_button(
+                            "📥 범용 원소 치환 예측 결과 CSV 다운로드",
+                            data=data.to_csv(index=False).encode("utf-8-sig"),
+                            file_name=f"SSE_AI_{APP_FILE_TAG}_generic_substitution.csv",
+                            mime="text/csv", key="v292_download",
+                        )
                 else:
                     st.info("위 버튼을 누르면 21개 조성의 AI 예측 그래프와 비교표가 생성됩니다.")
 
@@ -2463,10 +2481,7 @@ if selected_page == "data_quality":
         "동일 화학식의 측정값 차이에 대한 발표 피드백을 분석합니다. "
         "원래의 실험 기록과 논문 DOI를 보존하면서 통계만 계산합니다."
     )
-    st.info(
-        "현재 v1·v2 모델은 변경하지 않았습니다. 이 메뉴에서 만든 로그 중앙값 대표 데이터는 "
-        "**향후 재학습을 위한 후보**일 뿐, 현재 예측값이나 성능 수치에 적용되지 않습니다."
-    )
+    st.caption("원본 실험값과 논문 DOI를 조회합니다. 로그 중앙값은 기존 AI 모델에 적용되지 않은 분석용 대표값입니다.")
     st.caption("데이터: OBELiX 공식 **학습** CSV만 사용 · 공식 테스트셋은 불러오지 않음 · 단위 S/cm")
 
     if st.button("🔎 원본 데이터의 동일 조성·반복 측정 분석 시작", use_container_width=True, key="v12_run_audit"):
@@ -2502,202 +2517,204 @@ if selected_page == "data_quality":
             f"검출 한계/범위/0/비수치 등 제외 {audit_meta['invalid_or_censored']}건 · "
             f"화학식 해석 제외 {audit_meta['unparsed_formulas']}건"
         )
-        st.warning(
-            "**반복 기록 = 잘못된 중복 데이터가 아닙니다.** 같은 조성의 서로 다른 논문·결정구조·"
-            "시료·실험 조건 측정일 수 있습니다. 합쳐서 삭제하거나 중앙값으로 대체하기 전에 출처를 검토하세요."
-        )
+        st.caption("같은 원소 조성의 복수 기록은 서로 다른 실험·논문일 수 있으며 자동으로 제거하지 않았습니다.")
 
-        st.markdown("#### 2. 측정값이 서로 다른 조성 찾기")
-        if repeated.empty:
-            st.info("현재 정확한 양의 측정값 자료에서 반복 측정 조성을 찾지 못했습니다.")
+
+        st.markdown("#### 2. 화학식 검색 · 실제 문헌 측정값")
+        st.caption(
+            "유효 측정값이 있는 362종 전체에서 원소 비율이 같은 조성을 찾습니다. "
+            "화학식 순서와 괄호 표기가 달라도 같은 원소 비율이면 같은 조성으로 조회합니다. "
+            "반복 측정 여부와 관계없이 검색할 수 있습니다."
+        )
+        formula_search = st.text_input(
+            "분석할 화학식 (정확한 조성 검색)",
+            value="Li6PS5Cl",
+            placeholder="예: Li6PS5Cl 또는 Li10Ge(PS6)2",
+            key="v12_formula_search",
+        )
+        query_key = None
+        if formula_search.strip():
+            try:
+                query_key = v12_composition_key(normalize_user_formula(formula_search))
+            except (ValueError, TypeError, KeyError, OverflowError) as exc:
+                st.error(f"화학식 해석 실패: {exc}")
         else:
-            left, right = st.columns([2,1])
-            with left:
-                sort_choice = st.selectbox(
-                    "정렬 방식", ["측정값 차이 큰 순", "측정 기록 많은 순"], key="v12_sort"
-                )
-            with right:
-                only_diff = st.checkbox("서로 다른 측정값만", value=True, key="v12_diff_only")
-            filtered_groups = repeated.copy()
-            if only_diff:
-                filtered_groups = filtered_groups[filtered_groups["측정값 차이 (배)"] > (1.0 + 1e-10)]
-            if sort_choice == "측정값 차이 큰 순":
-                filtered_groups = filtered_groups.sort_values("측정값 차이 (배)", ascending=False)
+            st.info("화학식을 입력하면 해당 조성의 실제 학습 측정 기록을 조회합니다.")
+
+        matching = (
+            audit_summary[audit_summary["v12_key"].map(lambda key: key == query_key)]
+            if query_key is not None else audit_summary.iloc[0:0]
+        )
+        if query_key is not None and matching.empty:
+            st.warning(
+                "해당 원소 조성의 유효한 양의 수치형 측정 기록이 OBELiX 학습 자료에서 발견되지 않았습니다. "
+                "이전 검색 결과를 대신 표시하지 않습니다. "
+                "원본에 값이 없거나 검출한계·비수치 기록만 존재할 수도 있습니다."
+            )
+        elif not matching.empty:
+            selected = matching.iloc[0]
+            same_comp = audit_records[audit_records["v12_key"] == selected["v12_key"]].copy()
+            count = len(same_comp)
+            ratio = float(selected["측정값 차이 (배)"])
+            st.success(f"검색된 조성: {selected['대표 화학식']} · 유효 문헌 측정 기록 {count}건")
+            m1, m2, m3 = st.columns(3)
+            m1.metric("문헌 측정 기록", f"{count}건")
+            m2.metric("최댓값/최솟값", f"{ratio:.2f}배" if count >= 2 else "비교 불가 (1건)")
+            m3.metric(
+                "로그 중앙값 대표 전도도",
+                f"{selected['대표값: 로그 중앙값 역변환 (S/cm)']:.3e} S/cm",
+            )
+            if count == 1:
+                st.caption("측정값이 1건이므로 서로 다른 실험값의 차이를 계산할 수 없습니다. 중앙값은 해당 1건과 같습니다.")
             else:
-                filtered_groups = filtered_groups.sort_values(
-                    ["측정 기록 수", "측정값 차이 (배)"], ascending=False
+                st.caption("같은 원소 조성의 문헌 측정값은 서로 달라도 모두 원본 그대로 표시합니다.")
+
+            chart_data = same_comp[["v12_log", "v12_numeric", "v12_doi"]].copy().reset_index(drop=True)
+            chart_data["측정 번호"] = [f"측정 {i + 1}" for i in range(len(chart_data))]
+            fig = px.scatter(
+                chart_data, x="측정 번호", y="v12_log",
+                hover_data={"v12_numeric": ":.4e", "v12_doi": True},
+                labels={
+                    "v12_log": "문헌 측정 이온전도도 log₁₀(S/cm)",
+                    "v12_numeric": "실험값 (S/cm)",
+                    "v12_doi": "논문 DOI",
+                },
+                title="해당 조성의 원본 실험 측정값",
+            )
+            fig.update_traces(marker=dict(size=14, color="#26a69a"))
+            fig.add_hline(
+                y=float(selected["로그 중앙값"]),
+                line_dash="dash", line_color="#ffb74d", annotation_text="로그 중앙값",
+            )
+            fig.update_layout(height=350, margin=dict(l=10, r=15, t=55, b=25))
+            st.plotly_chart(fig, use_container_width=True)
+
+            detail_columns = [
+                c for c in ["ID", FORMULA_COL, TARGET_COL, "Family", "Space group", "DOI", "note"]
+                if c in same_comp.columns
+            ]
+            detailed = same_comp[detail_columns].copy()
+            if "DOI" in detailed.columns:
+                detailed["논문 링크"] = detailed["DOI"].fillna("").astype(str).map(
+                    lambda doi: f"https://doi.org/{doi.strip()}" if doi.strip().startswith("10.") else ""
                 )
-
-            show_groups = filtered_groups[[
-                "대표 화학식", "측정 기록 수", "서로 다른 논문 DOI 수",
-                "최솟값 (S/cm)", "최댓값 (S/cm)",
-                "측정값 차이 (배)", "대표값: 로그 중앙값 역변환 (S/cm)",
-            ]].head(60).copy()
-            for name in ["최솟값 (S/cm)", "최댓값 (S/cm)", "대표값: 로그 중앙값 역변환 (S/cm)"]:
-                show_groups[name] = show_groups[name].map(lambda n: f"{n:.3e}")
-            show_groups["측정값 차이 (배)"] = show_groups["측정값 차이 (배)"].map(lambda n: f"{n:.2f}")
-            v29_show_table(show_groups,
-                ["대표 화학식", "측정 기록 수", "측정값 차이 (배)", "대표값: 로그 중앙값 역변환 (S/cm)"],
-                key="v29_repeat_table")
-            st.caption("상위 60종만 화면에 표시합니다. 다운로드 CSV에는 전체 조성 분석이 포함됩니다.")
-
-            st.markdown("#### 3. 특정 조성의 원본 기록과 논문 출처 비교")
+            config = (
+                {"논문 링크": st.column_config.LinkColumn("논문 원문", display_text="원문 보기")}
+                if "논문 링크" in detailed.columns else {}
+            )
+            st.dataframe(detailed, use_container_width=True, hide_index=True, column_config=config)
             st.caption(
-                "유효 측정값이 있는 362종 전체에서 원소 비율이 같은 조성을 찾습니다. "
-                "화학식 순서와 괄호 표기가 달라도 같은 원소 비율이면 같은 조성으로 조회합니다. "
-                "반복 측정 여부와 관계없이 검색할 수 있습니다."
+                "문헌 실험 측정값과 논문 출처를 보여주는 분석 화면입니다. "
+                "AI 예측값이나 동일한 결정구조라는 증거는 아닙니다."
             )
-            formula_search = st.text_input(
-                "분석할 화학식 (정확한 조성 검색)",
-                value="Li6PS5Cl",
-                placeholder="예: Li6PS5Cl 또는 Li10Ge(PS6)2",
-                key="v12_formula_search",
-            )
-            query_key = None
-            if formula_search.strip():
-                try:
-                    query_key = v12_composition_key(normalize_user_formula(formula_search))
-                except (ValueError, TypeError, KeyError, OverflowError) as exc:
-                    st.error(f"화학식 해석 실패: {exc}")
+
+
+        with st.expander("반복 측정 조성 순위표 · 연구용 상세", expanded=False):
+            st.markdown("#### 2. 측정값이 서로 다른 조성 찾기")
+            if repeated.empty:
+                st.info("현재 정확한 양의 측정값 자료에서 반복 측정 조성을 찾지 못했습니다.")
             else:
-                st.info("화학식을 입력하면 해당 조성의 실제 학습 측정 기록을 조회합니다.")
+                left, right = st.columns([2,1])
+                with left:
+                    sort_choice = st.selectbox(
+                        "정렬 방식", ["측정값 차이 큰 순", "측정 기록 많은 순"], key="v12_sort"
+                    )
+                with right:
+                    only_diff = st.checkbox("서로 다른 측정값만", value=True, key="v12_diff_only")
+                filtered_groups = repeated.copy()
+                if only_diff:
+                    filtered_groups = filtered_groups[filtered_groups["측정값 차이 (배)"] > (1.0 + 1e-10)]
+                if sort_choice == "측정값 차이 큰 순":
+                    filtered_groups = filtered_groups.sort_values("측정값 차이 (배)", ascending=False)
+                else:
+                    filtered_groups = filtered_groups.sort_values(
+                        ["측정 기록 수", "측정값 차이 (배)"], ascending=False
+                    )
 
-            matching = (
-                audit_summary[audit_summary["v12_key"].map(lambda key: key == query_key)]
-                if query_key is not None else audit_summary.iloc[0:0]
+                show_groups = filtered_groups[[
+                    "대표 화학식", "측정 기록 수", "서로 다른 논문 DOI 수",
+                    "최솟값 (S/cm)", "최댓값 (S/cm)",
+                    "측정값 차이 (배)", "대표값: 로그 중앙값 역변환 (S/cm)",
+                ]].head(60).copy()
+                for name in ["최솟값 (S/cm)", "최댓값 (S/cm)", "대표값: 로그 중앙값 역변환 (S/cm)"]:
+                    show_groups[name] = show_groups[name].map(lambda n: f"{n:.3e}")
+                show_groups["측정값 차이 (배)"] = show_groups["측정값 차이 (배)"].map(lambda n: f"{n:.2f}")
+                v29_show_table(show_groups,
+                    ["대표 화학식", "측정 기록 수", "측정값 차이 (배)", "대표값: 로그 중앙값 역변환 (S/cm)"],
+                    key="v29_repeat_table")
+                st.caption("상위 60종만 화면에 표시합니다. 다운로드 CSV에는 전체 조성 분석이 포함됩니다.")
+
+
+        with st.expander("모델 학습 방식·중복 검토·원본 CSV 저장", expanded=False):
+            st.divider()
+            st.markdown("#### 4. 현재 모델은 이 차이를 어떻게 처리하나?")
+            st.write(
+                "현재 v1은 원소 조성비 **52개**, v2는 원소 조성비와 물성 특징 **59개**를 입력받습니다. "
+                "같은 조성은 모델에 같은 특징값으로 들어가기 때문에, 서로 다른 측정 조건의 차이를 "
+                "구분해 별도 전도도를 출력할 수 없습니다."
             )
-            if query_key is not None and matching.empty:
-                st.warning(
-                    "해당 원소 조성의 유효한 양의 수치형 측정 기록이 OBELiX 학습 자료에서 발견되지 않았습니다. "
-                    "이전 검색 결과를 대신 표시하지 않습니다. "
-                    "원본에 값이 없거나 검출한계·비수치 기록만 존재할 수도 있습니다."
-                )
-            elif not matching.empty:
-                selected = matching.iloc[0]
-                same_comp = audit_records[audit_records["v12_key"] == selected["v12_key"]].copy()
-                count = len(same_comp)
-                ratio = float(selected["측정값 차이 (배)"])
-                st.success(f"검색된 조성: {selected['대표 화학식']} · 유효 문헌 측정 기록 {count}건")
-                m1, m2, m3 = st.columns(3)
-                m1.metric("문헌 측정 기록", f"{count}건")
-                m2.metric("최댓값/최솟값", f"{ratio:.2f}배" if count >= 2 else "비교 불가 (1건)")
-                m3.metric(
-                    "로그 중앙값 대표 전도도",
-                    f"{selected['대표값: 로그 중앙값 역변환 (S/cm)']:.3e} S/cm",
-                )
-                if count == 1:
-                    st.caption("측정값이 1건이므로 서로 다른 실험값의 차이를 계산할 수 없습니다. 중앙값은 해당 1건과 같습니다.")
+            st.write(
+                "현재 모델의 학습 단계에서는 기록마다 하나의 목표 전도도를 사용했습니다. "
+                "동일 조성에 서로 다른 목표값이 존재하면 모델은 패턴을 학습하며 타협적인 값을 예측할 수 있습니다. "
+                "**이번 v12의 중앙값은 기존 AI 모델의 내부 계산식이나 기존 학습값을 변경하지 않습니다.**"
+            )
+            st.markdown("#### 5. 학습/검증 조성 겹침 확인 (참고)")
+            try:
+                split_info = v12_check_split_overlap()
+                if not split_info["available"]:
+                    st.info(split_info["note"])
                 else:
-                    st.caption("같은 원소 조성의 문헌 측정값은 서로 달라도 모두 원본 그대로 표시합니다.")
-
-                chart_data = same_comp[["v12_log", "v12_numeric", "v12_doi"]].copy().reset_index(drop=True)
-                chart_data["측정 번호"] = [f"측정 {i + 1}" for i in range(len(chart_data))]
-                fig = px.scatter(
-                    chart_data, x="측정 번호", y="v12_log",
-                    hover_data={"v12_numeric": ":.4e", "v12_doi": True},
-                    labels={
-                        "v12_log": "문헌 측정 이온전도도 log₁₀(S/cm)",
-                        "v12_numeric": "실험값 (S/cm)",
-                        "v12_doi": "논문 DOI",
-                    },
-                    title="해당 조성의 원본 실험 측정값",
-                )
-                fig.update_traces(marker=dict(size=14, color="#26a69a"))
-                fig.add_hline(
-                    y=float(selected["로그 중앙값"]),
-                    line_dash="dash", line_color="#ffb74d", annotation_text="로그 중앙값",
-                )
-                fig.update_layout(height=350, margin=dict(l=10, r=15, t=55, b=25))
-                st.plotly_chart(fig, use_container_width=True)
-
-                detail_columns = [
-                    c for c in ["ID", FORMULA_COL, TARGET_COL, "Family", "Space group", "DOI", "note"]
-                    if c in same_comp.columns
-                ]
-                detailed = same_comp[detail_columns].copy()
-                if "DOI" in detailed.columns:
-                    detailed["논문 링크"] = detailed["DOI"].fillna("").astype(str).map(
-                        lambda doi: f"https://doi.org/{doi.strip()}" if doi.strip().startswith("10.") else ""
+                    c1, c2, c3 = st.columns(3)
+                    c1.metric("학습 참조 기록", f"{split_info['n_train']}건")
+                    c2.metric("내부 검증 참조 기록", f"{split_info['n_valid']}건")
+                    c3.metric("양쪽에 나타난 동일 조성", f"{split_info['n_shared_compositions']}종")
+                    st.caption(
+                        f"내부 검증에서 학습 조성과 겹치는 기록 {split_info['n_valid_records_shared']}건. "
+                        "참조 CSV의 화학식만 비교했으며 논문별 중복은 검증하지 못했습니다."
                     )
-                config = (
-                    {"논문 링크": st.column_config.LinkColumn("논문 원문", display_text="원문 보기")}
-                    if "논문 링크" in detailed.columns else {}
-                )
-                st.dataframe(detailed, use_container_width=True, hide_index=True, column_config=config)
-                st.caption(
-                    "문헌 실험 측정값과 논문 출처를 보여주는 분석 화면입니다. "
-                    "AI 예측값이나 동일한 결정구조라는 증거는 아닙니다."
-                )
+                    if split_info["n_shared_compositions"]:
+                        st.warning(
+                            "학습과 내부 검증 양쪽에 같은 조성이 있습니다. 조성비만 입력하는 모델은 "
+                            "내부 검증 성능이 낙관적으로 보일 수 있어, 향후 조성·논문을 묶어 분리하는 검증이 필요합니다."
+                        )
+                        st.write("겹치는 조성 예시: " + ", ".join(split_info["examples"]))
+                    else:
+                        st.info(
+                            "두 참조 CSV에서는 동일 조성 겹침이 발견되지 않았습니다. "
+                            "다만 같은 논문의 유사 조성 여부까지 증명한 결과는 아닙니다."
+                        )
+            except Exception as exc:
+                st.warning("학습/검증 분할 겹침 분석을 수행하지 못했습니다.")
+                st.code(str(exc))
 
-        st.divider()
-        st.markdown("#### 4. 현재 모델은 이 차이를 어떻게 처리하나?")
-        st.write(
-            "현재 v1은 원소 조성비 **52개**, v2는 원소 조성비와 물성 특징 **59개**를 입력받습니다. "
-            "같은 조성은 모델에 같은 특징값으로 들어가기 때문에, 서로 다른 측정 조건의 차이를 "
-            "구분해 별도 전도도를 출력할 수 없습니다."
-        )
-        st.write(
-            "현재 모델의 학습 단계에서는 기록마다 하나의 목표 전도도를 사용했습니다. "
-            "동일 조성에 서로 다른 목표값이 존재하면 모델은 패턴을 학습하며 타협적인 값을 예측할 수 있습니다. "
-            "**이번 v12의 중앙값은 기존 AI 모델의 내부 계산식이나 기존 학습값을 변경하지 않습니다.**"
-        )
-        st.markdown("#### 5. 학습/검증 조성 겹침 확인 (참고)")
-        try:
-            split_info = v12_check_split_overlap()
-            if not split_info["available"]:
-                st.info(split_info["note"])
-            else:
-                c1, c2, c3 = st.columns(3)
-                c1.metric("학습 참조 기록", f"{split_info['n_train']}건")
-                c2.metric("내부 검증 참조 기록", f"{split_info['n_valid']}건")
-                c3.metric("양쪽에 나타난 동일 조성", f"{split_info['n_shared_compositions']}종")
-                st.caption(
-                    f"내부 검증에서 학습 조성과 겹치는 기록 {split_info['n_valid_records_shared']}건. "
-                    "참조 CSV의 화학식만 비교했으며 논문별 중복은 검증하지 못했습니다."
-                )
-                if split_info["n_shared_compositions"]:
-                    st.warning(
-                        "학습과 내부 검증 양쪽에 같은 조성이 있습니다. 조성비만 입력하는 모델은 "
-                        "내부 검증 성능이 낙관적으로 보일 수 있어, 향후 조성·논문을 묶어 분리하는 검증이 필요합니다."
-                    )
-                    st.write("겹치는 조성 예시: " + ", ".join(split_info["examples"]))
-                else:
-                    st.info(
-                        "두 참조 CSV에서는 동일 조성 겹침이 발견되지 않았습니다. "
-                        "다만 같은 논문의 유사 조성 여부까지 증명한 결과는 아닙니다."
-                    )
-        except Exception as exc:
-            st.warning("학습/검증 분할 겹침 분석을 수행하지 못했습니다.")
-            st.code(str(exc))
-
-        st.divider()
-        st.markdown("#### 6. 전체 결과 CSV 및 대표값 후보 다운로드")
-        summary_csv = audit_summary.drop(columns=["v12_key"]).copy()
-        representative = summary_csv[[
-            "대표 화학식", "측정 기록 수", "서로 다른 논문 DOI 수",
-            "대표값: 로그 중앙값 역변환 (S/cm)", "최솟값 (S/cm)",
-            "최댓값 (S/cm)", "측정값 차이 (배)",
-        ]].copy()
-        representative.insert(1, "대표 전도도의 log10", np.log10(representative["대표값: 로그 중앙값 역변환 (S/cm)"]))
-        original_csv = audit_records.drop(columns=["v12_key", "v12_doi"]).copy()
-        x1, x2, x3 = st.columns(3)
-        x1.download_button(
-            "📥 원본 유효 측정 기록", data=original_csv.to_csv(index=False).encode("utf-8-sig"),
-            file_name="SSE_v12_original_valid_measurements.csv", mime="text/csv", use_container_width=True
-        )
-        x2.download_button(
-            "📥 조성별 분포 통계", data=summary_csv.to_csv(index=False).encode("utf-8-sig"),
-            file_name="SSE_v12_duplicate_composition_summary.csv", mime="text/csv", use_container_width=True
-        )
-        x3.download_button(
-            "📥 대표값 학습 후보 데이터", data=representative.to_csv(index=False).encode("utf-8-sig"),
-            file_name="SSE_v12_logmedian_training_candidates.csv", mime="text/csv", use_container_width=True
-        )
-        st.warning(
-            "대표값 후보 데이터는 아직 모델 학습이나 검증에 사용하면 안 됩니다. "
-            "먼저 학습/검증 그룹을 나누고, 논문별 측정조건·공간군의 차이를 확인한 뒤 "
-            "훈련 구간에만 대표값 집계를 적용해야 데이터 누출을 방지할 수 있습니다."
-        )
+            st.divider()
+            st.markdown("#### 6. 전체 결과 CSV 및 대표값 후보 다운로드")
+            summary_csv = audit_summary.drop(columns=["v12_key"]).copy()
+            representative = summary_csv[[
+                "대표 화학식", "측정 기록 수", "서로 다른 논문 DOI 수",
+                "대표값: 로그 중앙값 역변환 (S/cm)", "최솟값 (S/cm)",
+                "최댓값 (S/cm)", "측정값 차이 (배)",
+            ]].copy()
+            representative.insert(1, "대표 전도도의 log10", np.log10(representative["대표값: 로그 중앙값 역변환 (S/cm)"]))
+            original_csv = audit_records.drop(columns=["v12_key", "v12_doi"]).copy()
+            x1, x2, x3 = st.columns(3)
+            x1.download_button(
+                "📥 원본 유효 측정 기록", data=original_csv.to_csv(index=False).encode("utf-8-sig"),
+                file_name="SSE_v12_original_valid_measurements.csv", mime="text/csv", use_container_width=True
+            )
+            x2.download_button(
+                "📥 조성별 분포 통계", data=summary_csv.to_csv(index=False).encode("utf-8-sig"),
+                file_name="SSE_v12_duplicate_composition_summary.csv", mime="text/csv", use_container_width=True
+            )
+            x3.download_button(
+                "📥 대표값 학습 후보 데이터", data=representative.to_csv(index=False).encode("utf-8-sig"),
+                file_name="SSE_v12_logmedian_training_candidates.csv", mime="text/csv", use_container_width=True
+            )
+            st.warning(
+                "대표값 후보 데이터는 아직 모델 학습이나 검증에 사용하면 안 됩니다. "
+                "먼저 학습/검증 그룹을 나누고, 논문별 측정조건·공간군의 차이를 확인한 뒤 "
+                "훈련 구간에만 대표값 집계를 적용해야 데이터 누출을 방지할 수 있습니다."
+            )
     else:
         st.info("위 분석 버튼을 누르면 실제 원본 학습 데이터에서 반복 측정 현황을 계산합니다.")
 
@@ -2739,39 +2756,15 @@ def v15_read_cv_tables():
     return result
 
 
-if selected_page == "cv_review":
+if selected_page == "validation" and validation_view == "cv":
     st.subheader("📈 AI 모델 개선 실험 · 5겹 교차검증")
-    st.write(
-        "1차 발표 이후 확인한 **반복 측정 기록의 차이**, **동일 조성의 학습·검증 겹침**, "
-        "**새로운 소재에서의 큰 예측 오차**를 보완하기 위해 세 가지 학습 방식을 비교했습니다."
-    )
-    st.info(
-        "이 메뉴는 Colab에서 이미 실시한 **449건의 학습용 데이터 교차검증 결과를 읽어 보여주는 페이지**입니다. "
-        "현재 앱에서 실행되는 v1·v2 저장 모델을 다시 평가한 결과는 아니며, "
-        "공식 테스트 121건을 재사용하지 않았습니다. 모델 교체나 재학습도 수행하지 않습니다."
-    )
-    st.markdown("#### 어떤 부분을 개선하려고 했나요?")
-    st.markdown(
-        "- **데이터 수와 반복 기록 분석:** 유효 측정 449건, 고유 조성 362종, 반복 측정 조성 55종을 확인했습니다. "
-        "같은 화학식이라도 논문·구조·합성 조건 등에 따라 값이 다를 수 있습니다.\n"
-        "- **학습·검증 분리 개선:** 기존 내부 검증에서 학습과 겹친 조성 5종(검증 기록 8건)을 발견했습니다. "
-        "이번에는 조성 단위와 조성·논문 연결 그룹 단위로 분리해 비교했습니다.\n"
-        "- **예측 성능 개선 시도:** 반복값을 로그 중앙값으로 요약하는 방법과 원소 물성 특징 추가 방법을 검증했습니다."
-    )
-    st.info(
-        "**내부 검증과 이번 5겹 교차검증의 차이**: 기존의 95건 내부 검증은 한 번 나눈 자료에서의 개발 중 점검입니다. "
-        "여기서는 학습용 449건을 다섯 묶음으로 반복 평가하고, 같은 원소 조성 또는 논문(DOI)으로 연결된 "
-        "기록이 학습·검증에 동시에 나타나지 않게 분리할 수 있습니다. "
-        "화면의 수치는 당시 Colab에서 수행한 실험 기록이며 현재 저장된 모델을 이 페이지에서 재학습하지 않습니다."
-    )
-    with st.expander("A·B·C 모델과 지표를 쉽게 설명하면?"):
-        st.write("**A**: 52개 원소 조성비로 각각의 측정 기록을 학습합니다.")
-        st.write("**B**: A에 원자 질량·전기음성도 등 물성 통계 7개를 더해 총 59개 특징을 사용합니다.")
-        st.write("**C**: 같은 조성의 여러 측정값을 학습 구간 안에서만 로그 중앙값으로 묶어 학습합니다. 특징은 52개입니다.")
-        st.write("**BASE**: 해당 학습 구간의 로그 전도도 중앙값 하나만 예측하는 단순 기준입니다.")
-        st.write("**MAE(평균 절대오차)**는 로그 예측값과 실제값의 평균 차이로 낮을수록 좋습니다. ")
-        st.write("**R²(결정계수)**는 1에 가까울수록 좋고 음수이면 평균값을 쓰는 단순 기준보다도 못할 수 있습니다.")
-        st.write("**5겹 교차검증**은 데이터를 다섯 묶음으로 나눠 각 묶음을 한 번씩 검증에 사용하는 방식입니다.")
+    st.write("중복 조성과 논문 출처를 함께 분리하여, 52개 특징(A)·59개 특징(B)·반복값 중앙값(C)의 학습 방식을 비교한 과거 5겹 교차검증 결과입니다.")
+    st.caption("개발 자료 449건의 별도 교차검증 실험이며, 현재 저장된 v1·v2 모델을 다시 학습하거나 공식 테스트를 재평가하지 않습니다.")
+    with st.expander("검증을 개선한 이유와 A·B·C 모델 설명", expanded=False):
+        st.write("기존 95건 내부 검증에는 학습과 조성이 겹친 기록이 있었습니다. 이번 실험은 같은 조성이나 논문으로 연결된 기록을 함께 분리하여 점검합니다.")
+        st.write("**A:** 원소 조성비 52개 · **B:** 원소 물성 7개 추가한 59개 특징 · **C:** 학습 구간에서 반복 측정값을 로그 중앙값으로 정리한 52개 특징 모델")
+        st.write("**BASE:** 학습 구간 로그 전도도 중앙값만 예측하는 기준선입니다. **MAE**는 낮을수록, **R²**는 대체로 높을수록 좋습니다.")
+        st.write("**5겹 교차검증:** 데이터를 다섯 묶음으로 나누어 한 묶음씩 번갈아 평가합니다.")
 
     missing_cv = [p.name for p in V15_CV_FILES.values() if not p.is_file()]
     if missing_cv:
@@ -2838,64 +2831,68 @@ if selected_page == "cv_review":
                         "동일 조성을 분리한 조건에서 A·B·C의 전체 MAE는 모두 약 0.83입니다. "
                         "한 방법이 뚜렷하게 우수하다고 보기 어렵습니다."
                     )
-                st.markdown("#### 2. 검증 묶음에 따라 오차가 얼마나 변하나요?")
-                fold_view = folds[(folds["검증방식"] == selected_method) & (folds["모델코드"].isin(["A", "B", "C"]))].copy()
-                fold_view["학습 방식"] = fold_view["모델코드"].map(name_by_code)
-                fig_fold = px.line(
-                    fold_view, x="폴드", y="MAE_log10", color="학습 방식", markers=True,
-                    title="5개 검증 묶음별 MAE",
-                    labels={"폴드": "검증 묶음 번호", "MAE_log10": "MAE (log10)"},
-                )
-                fig_fold.update_xaxes(dtick=1)
-                fig_fold.update_layout(height=380, margin=dict(l=20, r=15, t=58, b=35))
-                st.plotly_chart(fig_fold, use_container_width=True)
-                sizes = folds[(folds["검증방식"] == selected_method) & (folds["모델코드"] == "A")]
-                if not sizes.empty:
-                    st.caption("검증 묶음별 기록 수: " + ", ".join(str(int(v)) for v in sizes.sort_values("폴드")["검증기록"]) + "건")
-                    if selected_method == "조성+DOI 연결 분리":
-                        doi_overlap = sizes["DOI겹침"]
-                        st.caption(f"조성·DOI 연결 분리에서 폴드별 보고된 DOI 중복: {', '.join(str(int(v)) for v in doi_overlap)}건")
-                st.warning(
-                    "이번 실험은 **기존 OBELiX 학습 449건 안에서의 교차검증**입니다. "
-                    "이미 한 차례 확인한 공식 테스트셋을 이번 모델 선정에 사용하지 않았습니다. "
-                    "새로운 독립 테스트에서의 예측 성능이나 실제 배터리 성능을 보증하지 않습니다."
-                )
-
-                st.markdown("#### 3. 소재 계열별 오차 살펴보기")
-                st.caption("기록 수가 적은 계열의 MAE는 크게 흔들릴 수 있어 기본적으로 5건 이상인 계열만 표시합니다.")
-                family_model = st.selectbox("분석할 학습 방식", ["A", "B", "C"], format_func=lambda c: name_by_code[c], key="v15_family_model")
-                min_family_n = st.selectbox("최소 평가 기록 수", [5, 10, 20], key="v15_min_family_n")
-                family_view = families[
-                    (families["검증방식"] == selected_method)
-                    & (families["모델코드"] == family_model)
-                    & (families["기록수"] >= min_family_n)
-                ].sort_values("MAE_log10", ascending=False).head(15)
-                if family_view.empty:
-                    st.info("이 조건에 해당하는 소재 계열이 없습니다.")
-                else:
-                    shown_f = family_view[["소재계열", "기록수", "MAE_log10"]].copy()
-                    shown_f.columns = ["소재 계열", "평가 기록 수", "MAE (log10)"]
-                    st.dataframe(shown_f.round(3), hide_index=True, use_container_width=True)
-
-                st.markdown("#### 4. 개별 오차가 큰 사례 살펴보기")
-                example_view = predictions[
-                    (predictions["검증방식"] == selected_method)
-                    & (predictions["모델코드"] == family_model)
-                ].sort_values("절대오차_log10", ascending=False).head(10)
-                if not example_view.empty:
-                    cols = [c for c in ["화학식", "소재계열", "폴드", "실제_log10", "예측_log10", "절대오차_log10"] if c in example_view.columns]
-                    st.dataframe(example_view[cols].round(3), hide_index=True, use_container_width=True)
-                    st.caption("오차가 큰 사례를 보여주는 진단용 표이며, 이 결과로 모델을 반복 조정하면 검증 점수가 낙관적으로 변할 수 있습니다.")
-
-                st.markdown("#### 5. 검증 원본 결과 다운로드")
-                for name, title in [("summary", "전체 성능 요약"), ("fold", "폴드별 성능"), ("family", "소재 계열별 오차"), ("oof", "검증 예측 상세")]:
-                    st.download_button(
-                        f"📥 {title} CSV",
-                        data=cv_data[name].to_csv(index=False).encode("utf-8-sig"),
-                        file_name=V15_CV_FILES[name].name, mime="text/csv",
-                        key=f"v15_download_{name}",
+                with st.expander("검증 묶음별 오차 변화 · 자세히 보기", expanded=False):
+                    st.markdown("#### 2. 검증 묶음에 따라 오차가 얼마나 변하나요?")
+                    fold_view = folds[(folds["검증방식"] == selected_method) & (folds["모델코드"].isin(["A", "B", "C"]))].copy()
+                    fold_view["학습 방식"] = fold_view["모델코드"].map(name_by_code)
+                    fig_fold = px.line(
+                        fold_view, x="폴드", y="MAE_log10", color="학습 방식", markers=True,
+                        title="5개 검증 묶음별 MAE",
+                        labels={"폴드": "검증 묶음 번호", "MAE_log10": "MAE (log10)"},
                     )
-                st.caption("데이터 출처: Colab 5겹 교차검증 출력 CSV · 파일 생성 시의 모델 훈련 설정 및 데이터 분할을 보존한 기록입니다.")
+                    fig_fold.update_xaxes(dtick=1)
+                    fig_fold.update_layout(height=380, margin=dict(l=20, r=15, t=58, b=35))
+                    st.plotly_chart(fig_fold, use_container_width=True)
+                    sizes = folds[(folds["검증방식"] == selected_method) & (folds["모델코드"] == "A")]
+                    if not sizes.empty:
+                        st.caption("검증 묶음별 기록 수: " + ", ".join(str(int(v)) for v in sizes.sort_values("폴드")["검증기록"]) + "건")
+                        if selected_method == "조성+DOI 연결 분리":
+                            doi_overlap = sizes["DOI겹침"]
+                            st.caption(f"조성·DOI 연결 분리에서 폴드별 보고된 DOI 중복: {', '.join(str(int(v)) for v in doi_overlap)}건")
+                    st.warning(
+                        "이번 실험은 **기존 OBELiX 학습 449건 안에서의 교차검증**입니다. "
+                        "이미 한 차례 확인한 공식 테스트셋을 이번 모델 선정에 사용하지 않았습니다. "
+                        "새로운 독립 테스트에서의 예측 성능이나 실제 배터리 성능을 보증하지 않습니다."
+                    )
+
+                with st.expander("소재 계열별 오차 및 큰 오류 사례 · 연구용 상세", expanded=False):
+                    st.markdown("#### 3. 소재 계열별 오차 살펴보기")
+                    st.caption("기록 수가 적은 계열의 MAE는 크게 흔들릴 수 있어 기본적으로 5건 이상인 계열만 표시합니다.")
+                    family_model = st.selectbox("분석할 학습 방식", ["A", "B", "C"], format_func=lambda c: name_by_code[c], key="v15_family_model")
+                    min_family_n = st.selectbox("최소 평가 기록 수", [5, 10, 20], key="v15_min_family_n")
+                    family_view = families[
+                        (families["검증방식"] == selected_method)
+                        & (families["모델코드"] == family_model)
+                        & (families["기록수"] >= min_family_n)
+                    ].sort_values("MAE_log10", ascending=False).head(15)
+                    if family_view.empty:
+                        st.info("이 조건에 해당하는 소재 계열이 없습니다.")
+                    else:
+                        shown_f = family_view[["소재계열", "기록수", "MAE_log10"]].copy()
+                        shown_f.columns = ["소재 계열", "평가 기록 수", "MAE (log10)"]
+                        shown_f["소재 계열"] = shown_f["소재 계열"].fillna("미분류").replace({"None": "미분류", "nan": "미분류", "": "미분류"})
+                        st.dataframe(shown_f.round(3), hide_index=True, use_container_width=True)
+
+                    st.markdown("#### 4. 개별 오차가 큰 사례 살펴보기")
+                    example_view = predictions[
+                        (predictions["검증방식"] == selected_method)
+                        & (predictions["모델코드"] == family_model)
+                    ].sort_values("절대오차_log10", ascending=False).head(10)
+                    if not example_view.empty:
+                        cols = [c for c in ["화학식", "소재계열", "폴드", "실제_log10", "예측_log10", "절대오차_log10"] if c in example_view.columns]
+                        st.dataframe(example_view[cols].round(3), hide_index=True, use_container_width=True)
+                        st.caption("오차가 큰 사례를 보여주는 진단용 표이며, 이 결과로 모델을 반복 조정하면 검증 점수가 낙관적으로 변할 수 있습니다.")
+
+                with st.expander("검증 원본 CSV 다운로드", expanded=False):
+                    st.markdown("#### 5. 검증 원본 결과 다운로드")
+                    for name, title in [("summary", "전체 성능 요약"), ("fold", "폴드별 성능"), ("family", "소재 계열별 오차"), ("oof", "검증 예측 상세")]:
+                        st.download_button(
+                            f"📥 {title} CSV",
+                            data=cv_data[name].to_csv(index=False).encode("utf-8-sig"),
+                            file_name=V15_CV_FILES[name].name, mime="text/csv",
+                            key=f"v15_download_{name}",
+                        )
+                    st.caption("데이터 출처: Colab 5겹 교차검증 출력 CSV · 파일 생성 시의 모델 훈련 설정 및 데이터 분할을 보존한 기록입니다.")
 
 
 
@@ -2934,19 +2931,8 @@ def v27_composition_key(formula):
 
 if selected_page == "structure":
     st.subheader('🧬 결정구조 정보와 구조 기반 예측 가능성')
-    st.write('기존 AI는 **화학식만**으로 예측합니다. 구조 기반 모델은 공간군이나 격자 정보를 **실제로 알고 있을 때만** 적용할 수 있는 별도 연구 방향입니다.')
-    st.info('이 페이지는 **논문에 연결된 구조 기록과 기존 교차검증 결과를 조회하는 도구**입니다. 구조 기반 신규 모델을 실제 예측에 연결한 것은 아니며, 현재 AI 모델 파일도 변경되지 않았습니다.')
-    st.markdown(
-        "**이 화면의 네 가지 기능**: "
-        "① 구조 데이터 수집·CIF 상태 파악 → "
-        "② 화학식별 공간군·격자상수·논문 출처 조회 → "
-        "③ 구조 특징을 추가한 A/B 모델들의 기존 5겹 교차검증 결과 비교 → "
-        "④ 실제 시료의 구조 기반 예측을 위한 조건 확인"
-    )
-    st.caption(
-        "이 메뉴는 구조 기록을 조회하고 과거 검증 결과를 보여줍니다. "
-        "구조 기반 이온전도도 예측을 여기서 직접 계산하는 메뉴는 아닙니다."
-    )
+    st.write('동일 화학식에서도 공간군과 격자 정보가 다를 수 있습니다. 문헌 구조 기록을 비교하고 연구용 모델의 교차검증 결과를 확인합니다.')
+    st.caption("현재 화학식 예측 모델은 결정구조를 입력받지 않습니다. 구조 특징 모델은 별도 사전 검증 결과로만 보여줍니다.")
     try:
         v27_catalog, v27_cv, v27_folds = v27_load_structure_data()
     except Exception as v27_exc:
@@ -2960,9 +2946,9 @@ if selected_page == "structure":
         col1.metric('실험 전도도 기록', f'{len(v27_catalog)}건')
         col2.metric('서로 다른 조성', f'{v27_catalog.composition_key.nunique()}종')
         col3.metric('복수 공간군 기록 조성', f'{int((sg_by_formula>1).sum())}종')
-        col4.metric('CIF 상태 not available', f"{int(cif_status.get('not available',0))}건")
-        st.caption(f"CIF 상태 기록: done {int(cif_status.get('done',0))}건, not available {int(cif_status.get('not available',0))}건, 미기재 {int(cif_status.get('not recorded',0))}건. 여기서 'done'은 데이터의 처리 상태이며, 측정 시료와 구조가 정확히 일치한다는 보증이 아닙니다.")
-        st.warning('격자상수·공간군은 449건 모두 숫자로 채워져 있지만, 원문에서 **실제 전도도 측정 시료와 구조 자료가 동일한지**는 별도로 확인해야 합니다. 또한 측정 온도와 압축·소결 조건을 직접 나타내는 열은 없습니다.')
+        col4.metric('CIF 자료 이용 불가', f"{int(cif_status.get('not available',0))}건")
+        st.caption(f"CIF 처리 완료 {int(cif_status.get('done',0))}건 · 자료 이용 불가 {int(cif_status.get('not available',0))}건 · 상태 미기록 {int(cif_status.get('not recorded',0))}건. 처리 완료는 측정 시료와 구조의 일치를 보증하지 않습니다.")
+        st.caption('구조 숫자가 기록되어도 실제 전도도 측정 시료와 동일한 구조인지 원문 확인이 필요합니다.')
 
         st.markdown('### 2. 관심 화학식의 구조 기록 살펴보기')
         st.caption('예시: Li7La3Zr2O12 (동일 조성에서 다른 공간군 기록) · Li3PS4 · Li6PS5Cl. 일반 숫자·아래첨자·대소문자 입력을 지원합니다.')
@@ -2982,57 +2968,64 @@ if selected_page == "structure":
             m3.metric('서로 다른 격자상수 a', f"{matches['a'].nunique()}종")
             if matches['spacegroup_number'].nunique() > 1:
                 st.warning('같은 원소 조성에 다른 공간군이 기록돼 있어요. **화학식만으로 어떤 구조를 선택할지 알 수 없습니다.**')
-            viewcols=['ID','formula','spacegroup','spacegroup_number','a','b','c','alpha','beta','gamma','Z','cif_status','doi']
-            st.dataframe(matches[viewcols],hide_index=True,use_container_width=True)
-            labels={int(r.source_row):f"ID {r.ID} · SG {int(r.spacegroup_number)} · {r.formula} · DOI {r.doi}" for r in matches.itertuples()}
-            chosen_row=st.selectbox('원본 기록 상세 보기',list(labels),format_func=lambda i:labels[i],key='v27_struct_record')
-            row=v27_catalog.loc[v27_catalog['source_row']==chosen_row].iloc[0]
-            with st.container(border=True):
-                st.markdown(f"**원본 ID:** `{row['ID']}` · **원소 조성:** `{row['formula']}`")
-                st.write(f"**공간군:** {row.get('spacegroup','')} (No. {int(row['spacegroup_number'])})")
-                st.write(f"**격자 a,b,c:** {row['a']:.4f}, {row['b']:.4f}, {row['c']:.4f} Å · **격자각:** {row['alpha']:.3f}°, {row['beta']:.3f}°, {row['gamma']:.3f}° · **Z:** {int(row['Z'])}")
-                st.write(f"**CIF 처리 상태:** `{row['cif_status']}` · **CIF 출처 메모:** `{str(row.get('cif_reference','')) or '(기재 없음)'}`")
-                if row.get('structure_notes'):
-                    st.write(f"**원본 주석:** {row['structure_notes']}")
-                if str(row.get('close_match','')).lower() == 'yes':
-                    st.warning('원본에 close match가 표시된 기록입니다. 구조의 정확한 조성 대응 관계를 원문에서 확인해야 합니다.')
-                if row.get('doi_link'):
-                    st.markdown(f"[논문 DOI 출처 열기]({row['doi_link']})")
-                st.caption('DOI 출처와 격자 정보는 참고 기록입니다. 특정 격자 정보가 그 전도도 측정 시료 자체를 나타낸다고 자동으로 확정하지 않습니다.')
+            with st.expander('문헌별 구조 기록·공간군·격자상수 상세 보기', expanded=False):
+                viewcols=['ID','formula','spacegroup','spacegroup_number','a','b','c','alpha','beta','gamma','Z','cif_status','doi']
+                shown_structure = matches[viewcols].copy()
+                shown_structure['cif_status'] = shown_structure['cif_status'].map({
+                    'done': '처리 완료', 'not available': '자료 이용 불가', 'not recorded': '상태 미기록',
+                }).fillna(shown_structure['cif_status'])
+                st.dataframe(shown_structure, hide_index=True, use_container_width=True)
+                labels={int(r.source_row):f"ID {r.ID} · SG {int(r.spacegroup_number)} · {r.formula} · DOI {r.doi}" for r in matches.itertuples()}
+                chosen_row=st.selectbox('원본 기록 상세 보기',list(labels),format_func=lambda i:labels[i],key='v27_struct_record')
+                row=v27_catalog.loc[v27_catalog['source_row']==chosen_row].iloc[0]
+                with st.container(border=True):
+                    st.markdown(f"**원본 ID:** `{row['ID']}` · **원소 조성:** `{row['formula']}`")
+                    st.write(f"**공간군:** {row.get('spacegroup','')} (No. {int(row['spacegroup_number'])})")
+                    st.write(f"**격자 a,b,c:** {row['a']:.4f}, {row['b']:.4f}, {row['c']:.4f} Å · **격자각:** {row['alpha']:.3f}°, {row['beta']:.3f}°, {row['gamma']:.3f}° · **Z:** {int(row['Z'])}")
+                    st.write(f"**CIF 처리 상태:** `{ {'done': '처리 완료', 'not available': '자료 이용 불가', 'not recorded': '상태 미기록'}.get(row['cif_status'], row['cif_status']) }` · **CIF 출처 메모:** `{str(row.get('cif_reference','')) or '(기재 없음)'}`")
+                    if row.get('structure_notes'):
+                        st.write(f"**원본 주석:** {row['structure_notes']}")
+                    if str(row.get('close_match','')).lower() == 'yes':
+                        st.warning('원본에 close match가 표시된 기록입니다. 구조의 정확한 조성 대응 관계를 원문에서 확인해야 합니다.')
+                    if row.get('doi_link'):
+                        st.markdown(f"[논문 DOI 출처 열기]({row['doi_link']})")
+                    st.caption('DOI 출처와 격자 정보는 참고 기록입니다. 특정 격자 정보가 그 전도도 측정 시료 자체를 나타낸다고 자동으로 확정하지 않습니다.')
 
-        st.markdown('### 3. 구조 특징을 추가한 모델의 사전 검증')
-        st.caption('기존 개발 데이터 449건에 대해 별도로 재학습한 5겹 교차검증 결과이며, 현재 앱에 로드된 v1·v2 모델의 직접 비교 성능이 아닙니다.')
-        vmethod=st.radio('검증 자료 분리 방식', ['조성+DOI 연결 분리', '조성 분리'],format_func=lambda x: '조성 + 논문 출처 함께 분리' if 'DOI' in x else '조성만 분리',key='v27_cv_method')
-        a=v27_cv[v27_cv['검증방식']==vmethod].copy()
-        renames={'A52':'조성만 사용 (52개)','LATTICE':'격자 추가 (61개)','SPACEGROUP':'공간군 추가 (97개)','BOTH':'격자+공간군 (106개)'}
-        a['학습 방식']=a['모델'].map(renames)
-        if len(a)==4:
-            show=a[['학습 방식','특징개수','전체OOF_MAE','전체OOF_R2','폴드평균_MAE','폴드표준편차_MAE']].copy()
-            show.columns=['모델','특징 수','MAE (낮을수록 좋음)','R² (높을수록 좋음)','5개 폴드 MAE 평균','폴드 MAE 표준편차']
-            st.dataframe(show.round(3),hide_index=True,use_container_width=True)
-            fig=px.bar(a,x='학습 방식',y='전체OOF_MAE',text='전체OOF_MAE',title='모델별 5겹 교차검증 MAE',labels={'학습 방식':'학습 방식','전체OOF_MAE':'MAE(log10)'})
-            fig.update_traces(texttemplate='%{text:.3f}',textposition='outside',cliponaxis=False)
-            fig.update_yaxes(range=[0,float(a['전체OOF_MAE'].max())*1.2])
-            fig.update_layout(height=380,margin=dict(l=20,r=10,t=60,b=35))
-            st.plotly_chart(fig,use_container_width=True)
-            vfold=v27_folds[v27_folds['검증방식']==vmethod].copy()
-            vfold['학습 방식']=vfold['모델'].map(renames)
-            fig2=px.line(vfold,x='폴드',y='MAE_log10',color='학습 방식',markers=True,title='5개 검증 묶음별 오차 변화',labels={'폴드':'검증 묶음 번호','MAE_log10':'MAE(log10)'})
-            fig2.update_xaxes(dtick=1)
-            fig2.update_layout(height=370,margin=dict(l=20,r=10,t=60,b=30))
-            st.plotly_chart(fig2,use_container_width=True)
-            st.info('조성·논문 동시 분리에서 격자만 추가한 모델은 **MAE 약 1.233 / R² 약 0.466**, 공간군만 추가한 모델은 **MAE 약 1.202 / R² 약 0.404**였어요. 서로 다른 지표에서 장점이 다르며, 여러 방식 탐색 후 얻은 결과이므로 독립 검증에서의 우수성을 보증하지 않습니다.' if 'DOI' in vmethod else '조성만 분리할 때의 검증 점수는 논문 출처까지 분리했을 때보다 낙관적으로 나올 수 있습니다.')
-            st.download_button('📥 구조 특징 교차검증 결과 CSV',data=v27_cv.to_csv(index=False).encode('utf-8-sig'),file_name='SSE_v27_structure_cv_summary.csv',mime='text/csv',key='v27_cv_download')
-        else:
-            st.error('교차검증 결과의 모델 4개가 모두 존재하지 않습니다. CSV 파일을 확인해 주세요.')
+        with st.expander('구조 특징 모델 4종 · 5겹 교차검증 결과 (연구용)', expanded=False):
+            st.markdown('### 3. 구조 특징을 추가한 모델의 사전 검증')
+            st.caption('기존 개발 데이터 449건에 대해 별도로 재학습한 5겹 교차검증 결과이며, 현재 앱에 로드된 v1·v2 모델의 직접 비교 성능이 아닙니다.')
+            vmethod=st.radio('검증 자료 분리 방식', ['조성+DOI 연결 분리', '조성 분리'],format_func=lambda x: '조성 + 논문 출처 함께 분리' if 'DOI' in x else '조성만 분리',key='v27_cv_method')
+            a=v27_cv[v27_cv['검증방식']==vmethod].copy()
+            renames={'A52':'조성만 사용 (52개)','LATTICE':'격자 추가 (61개)','SPACEGROUP':'공간군 추가 (97개)','BOTH':'격자+공간군 (106개)'}
+            a['학습 방식']=a['모델'].map(renames)
+            if len(a)==4:
+                show=a[['학습 방식','특징개수','전체OOF_MAE','전체OOF_R2','폴드평균_MAE','폴드표준편차_MAE']].copy()
+                show.columns=['모델','특징 수','MAE (낮을수록 좋음)','R² (높을수록 좋음)','5개 폴드 MAE 평균','폴드 MAE 표준편차']
+                st.dataframe(show.round(3),hide_index=True,use_container_width=True)
+                fig=px.bar(a,x='학습 방식',y='전체OOF_MAE',text='전체OOF_MAE',title='모델별 5겹 교차검증 MAE',labels={'학습 방식':'학습 방식','전체OOF_MAE':'MAE(log10)'})
+                fig.update_traces(texttemplate='%{text:.3f}',textposition='outside',cliponaxis=False)
+                fig.update_yaxes(range=[0,float(a['전체OOF_MAE'].max())*1.2])
+                fig.update_layout(height=380,margin=dict(l=20,r=10,t=60,b=35))
+                st.plotly_chart(fig,use_container_width=True)
+                vfold=v27_folds[v27_folds['검증방식']==vmethod].copy()
+                vfold['학습 방식']=vfold['모델'].map(renames)
+                fig2=px.line(vfold,x='폴드',y='MAE_log10',color='학습 방식',markers=True,title='5개 검증 묶음별 오차 변화',labels={'폴드':'검증 묶음 번호','MAE_log10':'MAE(log10)'})
+                fig2.update_xaxes(dtick=1)
+                fig2.update_layout(height=370,margin=dict(l=20,r=10,t=60,b=30))
+                st.plotly_chart(fig2,use_container_width=True)
+                st.info('조성·논문 동시 분리에서 격자만 추가한 모델은 **MAE 약 1.233 / R² 약 0.466**, 공간군만 추가한 모델은 **MAE 약 1.202 / R² 약 0.404**였어요. 서로 다른 지표에서 장점이 다르며, 여러 방식 탐색 후 얻은 결과이므로 독립 검증에서의 우수성을 보증하지 않습니다.' if 'DOI' in vmethod else '조성만 분리할 때의 검증 점수는 논문 출처까지 분리했을 때보다 낙관적으로 나올 수 있습니다.')
+                st.download_button('📥 구조 특징 교차검증 결과 CSV',data=v27_cv.to_csv(index=False).encode('utf-8-sig'),file_name='SSE_v27_structure_cv_summary.csv',mime='text/csv',key='v27_cv_download')
+            else:
+                st.error('교차검증 결과의 모델 4개가 모두 존재하지 않습니다. CSV 파일을 확인해 주세요.')
 
-        st.markdown('### 4. 연구용 구조 모델을 실제로 사용하기 위한 조건')
-        st.write('① 예측하려는 **실제 시료의** 구조 또는 출처가 확인되어야 합니다. ② 구조 정보가 유효한 훈련 데이터로 별도 모델을 학습해야 합니다. ③ 기존 조성 모델과 공정한 평가를 마친 뒤에만 기능을 연결해야 합니다.')
-        st.warning('이 **구조 정보 조회 메뉴**에서는 구조 모델로 예측하지 않습니다. 별도 **구조 기반 시범 예측** 메뉴에서 모델 파일을 준비한 뒤 연구용으로 시험할 수 있으며, 화학식만 가진 경우에는 기존 **AI 예측 · 소재 비교** 메뉴를 이용해 주세요.')
+        with st.expander('구조 기반 AI 예측을 실제로 적용하기 위한 조건', expanded=False):
+            st.markdown('### 4. 연구용 구조 모델을 실제로 사용하기 위한 조건')
+            st.write('① 예측하려는 **실제 시료의** 구조 또는 출처가 확인되어야 합니다. ② 구조 정보가 유효한 훈련 데이터로 별도 모델을 학습해야 합니다. ③ 기존 조성 모델과 공정한 평가를 마친 뒤에만 기능을 연결해야 합니다.')
+            st.warning('이 **구조 정보 조회 메뉴**에서는 구조 모델로 예측하지 않습니다. 별도 **구조 기반 시범 예측** 메뉴에서 모델 파일을 준비한 뒤 연구용으로 시험할 수 있으며, 화학식만 가진 경우에는 기존 **AI 예측 · 소재 비교** 메뉴를 이용해 주세요.')
 
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────────
 # v28: separate research-only lattice model (only after user trains it with sklearn 1.6.1)
 # ─────────────────────────────────────────────────────────────────────────────
 V28_MODEL_PATH = BASE_DIR / 'SSE_AI_Structure_Model_v28.joblib'
@@ -3282,6 +3275,5 @@ if selected_page == "readiness":
                        file_name=f"SSE_AI_Lab_{APP_FILE_TAG}_deployment_checklist.txt", mime="text/plain")
 
 
-if selected_page != "home":
-    st.divider()
-    st.caption("SSE-AI Lab · 2차 중간발표 시연용 | 예측값은 실험값이 아니며, 유사도·모델 차이는 정확도 확률이 아닙니다.")
+st.divider()
+st.caption("SSE-AI Lab v29.3 · 연구용 참고 도구 | 예측값은 실험값이 아니며 예측 정확도가 보장되지 않습니다.")
