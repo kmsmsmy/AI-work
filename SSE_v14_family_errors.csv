@@ -1,0 +1,265 @@
+﻿검증방식,모델코드,소재계열,기록수,MAE_log10
+조성 분리,A,pyrophosphate,1,8.026753461537375
+조성 분리,A,copper pyroborate,1,5.879611266998789
+조성 분리,A,Tavorite,1,5.098897669446049
+조성 분리,A,nitridosilicates,1,3.9606330228450606
+조성 분리,A,halides,5,3.0293564462437663
+조성 분리,A,boron nitride,2,3.0259316626825603
+조성 분리,A,nitrides,2,2.976622053056026
+조성 분리,A,layered,1,2.941382456230024
+조성 분리,A,zirconates,1,2.9194975246538464
+조성 분리,A,argyrodite,1,2.850405428763758
+조성 분리,A,Chalcogenidotetrelates,1,2.739475664822013
+조성 분리,A,boracites,1,2.5884439009254496
+조성 분리,A,cholorides,1,2.1238517947500837
+조성 분리,A,phosphates,6,2.111441308050825
+조성 분리,A,thio-phosphate,2,1.8193120674397045
+조성 분리,A,hydrides,3,1.6678345447285208
+조성 분리,A,LISICON,21,1.542409786555932
+조성 분리,A,thio-LISICON,17,1.4839783025948865
+조성 분리,A,sulfides,7,1.2240046257369206
+조성 분리,A,oxides,17,1.2195588859127564
+조성 분리,A,fluorides,1,1.101334358263891
+조성 분리,A,hexaoxometalates,2,1.0733705515380114
+조성 분리,A,molybdates,3,0.996362894294025
+조성 분리,A,antiperovskite,3,0.8920945164967584
+조성 분리,A,,18,0.8217454949953272
+조성 분리,A,perovskites,26,0.7731281583552285
+조성 분리,A,chlorides,5,0.7269692576756228
+조성 분리,A,NASICON,130,0.6356201826961798
+조성 분리,A,garnet-like,2,0.6285387740582227
+조성 분리,A,argyrodites,49,0.44625810947909134
+조성 분리,A,garnet,81,0.3975540973078495
+조성 분리,A,LGPS,36,0.3706698514986413
+조성 분리,A,nitride,1,0.279515374454685
+조성 분리,B,pyrophosphate,1,10.060210419532252
+조성 분리,B,boracites,1,5.660113994799346
+조성 분리,B,nitridosilicates,1,5.560256854231862
+조성 분리,B,copper pyroborate,1,4.666031932828323
+조성 분리,B,nitrides,2,4.204611413170922
+조성 분리,B,argyrodite,1,3.6030557447308347
+조성 분리,B,halides,5,3.4469351897117746
+조성 분리,B,Chalcogenidotetrelates,1,2.663340295876603
+조성 분리,B,phosphates,6,2.1753922246759543
+조성 분리,B,LISICON,21,2.126192098659184
+조성 분리,B,thio-phosphate,2,1.9871359127049937
+조성 분리,B,hexaoxometalates,2,1.8296591952149597
+조성 분리,B,fluorides,1,1.8113702162887986
+조성 분리,B,layered,1,1.6277114778138304
+조성 분리,B,thio-LISICON,17,1.4161754806148945
+조성 분리,B,antiperovskite,3,1.372793862735783
+조성 분리,B,boron nitride,2,1.3676996349813466
+조성 분리,B,molybdates,3,1.3597115849357886
+조성 분리,B,oxides,17,1.1232267790077406
+조성 분리,B,hydrides,3,1.014910215192547
+조성 분리,B,sulfides,7,0.9852738897356575
+조성 분리,B,zirconates,1,0.9722058224059058
+조성 분리,B,Tavorite,1,0.959355814966341
+조성 분리,B,,18,0.8747491583125514
+조성 분리,B,cholorides,1,0.7804703042238907
+조성 분리,B,NASICON,130,0.663109048436161
+조성 분리,B,chlorides,5,0.6320752335571328
+조성 분리,B,perovskites,26,0.5723615068847301
+조성 분리,B,garnet-like,2,0.44334268857564574
+조성 분리,B,argyrodites,49,0.4097750705283099
+조성 분리,B,LGPS,36,0.35633044608290293
+조성 분리,B,garnet,81,0.3287692907291711
+조성 분리,B,nitride,1,0.3072463619238137
+조성 분리,BASE,pyrophosphate,1,12.659526004163087
+조성 분리,BASE,copper pyroborate,1,8.990782691803137
+조성 분리,BASE,argyrodite,1,5.915399514618583
+조성 분리,BASE,nitridosilicates,1,5.760333770424864
+조성 분리,BASE,zirconates,1,5.274779348168338
+조성 분리,BASE,oxides,17,4.861173255004607
+조성 분리,BASE,molybdates,3,4.828006745266941
+조성 분리,BASE,LISICON,21,4.715247320383304
+조성 분리,BASE,boron nitride,2,4.418963074165866
+조성 분리,BASE,thio-phosphate,2,4.1250510447623645
+조성 분리,BASE,phosphates,6,3.6911669752829055
+조성 분리,BASE,nitride,1,3.2088453772541294
+조성 분리,BASE,hydrides,3,2.5361582003535887
+조성 분리,BASE,thio-LISICON,17,2.5097857636409726
+조성 분리,BASE,halides,5,2.389872785713979
+조성 분리,BASE,hexaoxometalates,2,2.350285896171644
+조성 분리,BASE,chlorides,5,2.2149406970361105
+조성 분리,BASE,sulfides,7,2.1700439181263613
+조성 분리,BASE,fluorides,1,2.164352855784437
+조성 분리,BASE,Tavorite,1,1.9548378412418064
+조성 분리,BASE,LGPS,36,1.7334489905012544
+조성 분리,BASE,boracites,1,1.5622928644564746
+조성 분리,BASE,,18,1.4218581488862538
+조성 분리,BASE,antiperovskite,3,1.3568972267162682
+조성 분리,BASE,argyrodites,49,1.1739867464148623
+조성 분리,BASE,perovskites,26,1.1649250525416392
+조성 분리,BASE,NASICON,130,1.0598691925367367
+조성 분리,BASE,cholorides,1,1.0213380555303422
+조성 분리,BASE,garnet,81,0.9091386325926412
+조성 분리,BASE,garnet-like,2,0.707647685032804
+조성 분리,BASE,nitrides,2,0.6246284907417536
+조성 분리,BASE,layered,1,0.08839855424448695
+조성 분리,BASE,Chalcogenidotetrelates,1,0.07030147460432623
+조성 분리,C,pyrophosphate,1,7.702458634871704
+조성 분리,C,copper pyroborate,1,5.851356117164835
+조성 분리,C,Tavorite,1,5.04053658831844
+조성 분리,C,nitridosilicates,1,3.961718051895515
+조성 분리,C,halides,5,3.071296803324039
+조성 분리,C,layered,1,3.0018894139947476
+조성 분리,C,boron nitride,2,2.9069393498717764
+조성 분리,C,boracites,1,2.856991995145586
+조성 분리,C,nitrides,2,2.835063478752052
+조성 분리,C,zirconates,1,2.7619352757467324
+조성 분리,C,Chalcogenidotetrelates,1,2.6829059785883267
+조성 분리,C,argyrodite,1,2.6143175170340074
+조성 분리,C,thio-phosphate,2,2.1173635279109577
+조성 분리,C,phosphates,6,2.1090112467570394
+조성 분리,C,cholorides,1,1.9793590274395196
+조성 분리,C,LISICON,21,1.6366440021529387
+조성 분리,C,thio-LISICON,17,1.4771813462544476
+조성 분리,C,hydrides,3,1.4507925112574158
+조성 분리,C,sulfides,7,1.3002908377073419
+조성 분리,C,oxides,17,1.200858635243531
+조성 분리,C,hexaoxometalates,2,1.1269651470522635
+조성 분리,C,fluorides,1,1.0583739912113677
+조성 분리,C,molybdates,3,0.968024141938877
+조성 분리,C,antiperovskite,3,0.8856492510838386
+조성 분리,C,,18,0.8072686235755501
+조성 분리,C,chlorides,5,0.8027008077788551
+조성 분리,C,perovskites,26,0.765985617094784
+조성 분리,C,NASICON,130,0.6359712011436169
+조성 분리,C,garnet-like,2,0.5679624968117514
+조성 분리,C,argyrodites,49,0.4429828694383315
+조성 분리,C,garnet,81,0.40692622394995887
+조성 분리,C,LGPS,36,0.3714043776484974
+조성 분리,C,nitride,1,0.21772592632591703
+조성+DOI 연결 분리,A,pyrophosphate,1,9.147302189212521
+조성+DOI 연결 분리,A,Tavorite,1,5.191026991486322
+조성+DOI 연결 분리,A,copper pyroborate,1,4.8743923720273035
+조성+DOI 연결 분리,A,nitridosilicates,1,3.5278047657160414
+조성+DOI 연결 분리,A,cholorides,1,3.094929537998201
+조성+DOI 연결 분리,A,zirconates,1,3.0738160314839975
+조성+DOI 연결 분리,A,boracites,1,2.963994227093673
+조성+DOI 연결 분리,A,halides,5,2.906688749132421
+조성+DOI 연결 분리,A,layered,1,2.7946288401829746
+조성+DOI 연결 분리,A,nitrides,2,2.6550943626092156
+조성+DOI 연결 분리,A,Chalcogenidotetrelates,1,2.6069462459905095
+조성+DOI 연결 분리,A,LISICON,21,2.4331974154253446
+조성+DOI 연결 분리,A,argyrodite,1,2.4173280797673824
+조성+DOI 연결 분리,A,phosphates,6,2.292524106889365
+조성+DOI 연결 분리,A,molybdates,3,2.244035729396226
+조성+DOI 연결 분리,A,thio-phosphate,2,2.2203406241975436
+조성+DOI 연결 분리,A,argyrodites,49,1.7943795854043916
+조성+DOI 연결 분리,A,thio-LISICON,17,1.681915857426653
+조성+DOI 연결 분리,A,oxides,17,1.5995531605037592
+조성+DOI 연결 분리,A,sulfides,7,1.5377609367888139
+조성+DOI 연결 분리,A,hydrides,3,1.4166385839155415
+조성+DOI 연결 분리,A,boron nitride,2,1.3676996349813466
+조성+DOI 연결 분리,A,chlorides,5,1.251928476522189
+조성+DOI 연결 분리,A,NASICON,130,1.2349750693438544
+조성+DOI 연결 분리,A,perovskites,26,1.2119484564614078
+조성+DOI 연결 분리,A,hexaoxometalates,2,1.0461571775748904
+조성+DOI 연결 분리,A,,18,0.9286488106210109
+조성+DOI 연결 분리,A,antiperovskite,3,0.813411617217913
+조성+DOI 연결 분리,A,LGPS,36,0.6312914052248799
+조성+DOI 연결 분리,A,fluorides,1,0.5161245033172674
+조성+DOI 연결 분리,A,garnet,81,0.46953580561134556
+조성+DOI 연결 분리,A,garnet-like,2,0.4274668693890198
+조성+DOI 연결 분리,A,nitride,1,0.06548757244014602
+조성+DOI 연결 분리,B,pyrophosphate,1,9.349405305146567
+조성+DOI 연결 분리,B,nitridosilicates,1,5.525730815841271
+조성+DOI 연결 분리,B,copper pyroborate,1,5.160120431796157
+조성+DOI 연결 분리,B,boracites,1,4.371777252865735
+조성+DOI 연결 분리,B,molybdates,3,3.5477369004708628
+조성+DOI 연결 분리,B,argyrodite,1,3.539079609491723
+조성+DOI 연결 분리,B,phosphates,6,3.4802502523343932
+조성+DOI 연결 분리,B,halides,5,3.4610166945336887
+조성+DOI 연결 분리,B,LISICON,21,3.035522958630916
+조성+DOI 연결 분리,B,nitrides,2,2.665074212892195
+조성+DOI 연결 분리,B,cholorides,1,2.1989296582478
+조성+DOI 연결 분리,B,Chalcogenidotetrelates,1,1.980510300888331
+조성+DOI 연결 분리,B,thio-phosphate,2,1.939901929772284
+조성+DOI 연결 분리,B,fluorides,1,1.9391735385528097
+조성+DOI 연결 분리,B,perovskites,26,1.926949978511823
+조성+DOI 연결 분리,B,hexaoxometalates,2,1.84117359407227
+조성+DOI 연결 분리,B,oxides,17,1.7666535287339389
+조성+DOI 연결 분리,B,thio-LISICON,17,1.6474301636792887
+조성+DOI 연결 분리,B,NASICON,130,1.6182599540721352
+조성+DOI 연결 분리,B,zirconates,1,1.5476874346595757
+조성+DOI 연결 분리,B,boron nitride,2,1.3676996349813466
+조성+DOI 연결 분리,B,chlorides,5,1.307502571635168
+조성+DOI 연결 분리,B,sulfides,7,1.282837169648425
+조성+DOI 연결 분리,B,antiperovskite,3,1.0657048041721133
+조성+DOI 연결 분리,B,layered,1,1.0236941103265216
+조성+DOI 연결 분리,B,hydrides,3,0.9879054480103694
+조성+DOI 연결 분리,B,,18,0.9809766085015403
+조성+DOI 연결 분리,B,argyrodites,49,0.9228944327884334
+조성+DOI 연결 분리,B,garnet,81,0.5390069860321086
+조성+DOI 연결 분리,B,LGPS,36,0.4117802606274281
+조성+DOI 연결 분리,B,garnet-like,2,0.31076870541037493
+조성+DOI 연결 분리,B,nitride,1,0.2992523625260386
+조성+DOI 연결 분리,B,Tavorite,1,0.06379006918889019
+조성+DOI 연결 분리,BASE,pyrophosphate,1,12.809040368747805
+조성+DOI 연결 분리,BASE,copper pyroborate,1,8.994956616545254
+조성+DOI 연결 분리,BASE,argyrodite,1,6.012837224705172
+조성+DOI 연결 분리,BASE,nitridosilicates,1,5.684422896161776
+조성+DOI 연결 분리,BASE,zirconates,1,5.296833881070373
+조성+DOI 연결 분리,BASE,oxides,17,4.911727503695989
+조성+DOI 연결 분리,BASE,molybdates,3,4.791799865070003
+조성+DOI 연결 분리,BASE,LISICON,21,4.78701505156755
+조성+DOI 연결 분리,BASE,boron nitride,2,4.440833314995113
+조성+DOI 연결 분리,BASE,thio-phosphate,2,4.124523347683832
+조성+DOI 연결 분리,BASE,phosphates,6,3.7182651626731613
+조성+DOI 연결 분리,BASE,nitride,1,3.1245866535068085
+조성+DOI 연결 분리,BASE,hydrides,3,2.633074187112969
+조성+DOI 연결 분리,BASE,thio-LISICON,17,2.556386260880536
+조성+DOI 연결 분리,BASE,hexaoxometalates,2,2.4508175571737993
+조성+DOI 연결 분리,BASE,halides,5,2.4113271536302405
+조성+DOI 연결 분리,BASE,fluorides,1,2.3136829282963665
+조성+DOI 연결 분리,BASE,sulfides,7,2.2672615780746432
+조성+DOI 연결 분리,BASE,chlorides,5,2.2481348959245095
+조성+DOI 연결 분리,BASE,Tavorite,1,2.1041679137537357
+조성+DOI 연결 분리,BASE,LGPS,36,1.64120876316848
+조성+DOI 연결 분리,BASE,boracites,1,1.6138418218760693
+조성+DOI 연결 분리,BASE,antiperovskite,3,1.4377618460017352
+조성+DOI 연결 분리,BASE,,18,1.4167212779792377
+조성+DOI 연결 분리,BASE,NASICON,130,1.2395195116976547
+조성+DOI 연결 분리,BASE,argyrodites,49,1.1782974582962655
+조성+DOI 연결 분리,BASE,perovskites,26,1.1071726530279586
+조성+DOI 연결 분리,BASE,cholorides,1,1.0728870129499368
+조성+DOI 연결 분리,BASE,garnet,81,0.9238298603616293
+조성+DOI 연결 분리,BASE,garnet-like,2,0.7892582090340623
+조성+DOI 연결 분리,BASE,nitrides,2,0.5450713888150827
+조성+DOI 연결 분리,BASE,Chalcogenidotetrelates,1,0.06977377752579361
+조성+DOI 연결 분리,BASE,layered,1,0.06652831341523946
+조성+DOI 연결 분리,C,pyrophosphate,1,9.148516635272047
+조성+DOI 연결 분리,C,copper pyroborate,1,5.110305826469958
+조성+DOI 연결 분리,C,Tavorite,1,4.0294345534501295
+조성+DOI 연결 분리,C,nitridosilicates,1,3.487081128150984
+조성+DOI 연결 분리,C,zirconates,1,3.0031036882561777
+조성+DOI 연결 분리,C,halides,5,2.9806811216178035
+조성+DOI 연결 분리,C,cholorides,1,2.9009420357155147
+조성+DOI 연결 분리,C,boracites,1,2.687402182379003
+조성+DOI 연결 분리,C,layered,1,2.5727386450603347
+조성+DOI 연결 분리,C,LISICON,21,2.523292011146575
+조성+DOI 연결 분리,C,thio-phosphate,2,2.5205217846730976
+조성+DOI 연결 분리,C,argyrodite,1,2.3963798943792014
+조성+DOI 연결 분리,C,Chalcogenidotetrelates,1,2.383552498696032
+조성+DOI 연결 분리,C,nitrides,2,2.361260637241921
+조성+DOI 연결 분리,C,phosphates,6,2.2804084766758486
+조성+DOI 연결 분리,C,molybdates,3,2.227771457297948
+조성+DOI 연결 분리,C,argyrodites,49,1.7663662003468117
+조성+DOI 연결 분리,C,thio-LISICON,17,1.6679847704264308
+조성+DOI 연결 분리,C,oxides,17,1.5704962716423736
+조성+DOI 연결 분리,C,sulfides,7,1.501847279984517
+조성+DOI 연결 분리,C,hydrides,3,1.4434313706439739
+조성+DOI 연결 분리,C,boron nitride,2,1.3676996349813466
+조성+DOI 연결 분리,C,NASICON,130,1.2447325331054393
+조성+DOI 연결 분리,C,chlorides,5,1.2368174362973279
+조성+DOI 연결 분리,C,perovskites,26,1.138199573057724
+조성+DOI 연결 분리,C,hexaoxometalates,2,1.0522013069222584
+조성+DOI 연결 분리,C,antiperovskite,3,1.0039030697982385
+조성+DOI 연결 분리,C,,18,0.9850681185077553
+조성+DOI 연결 분리,C,LGPS,36,0.6946082494328265
+조성+DOI 연결 분리,C,garnet,81,0.4997293001988055
+조성+DOI 연결 분리,C,garnet-like,2,0.46349102206365345
+조성+DOI 연결 분리,C,fluorides,1,0.37956555258925295
+조성+DOI 연결 분리,C,nitride,1,0.20989090535593125

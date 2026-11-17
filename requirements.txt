@@ -1,0 +1,9 @@
+# 2차 중간발표 Streamlit Community Cloud | Python 3.12
+streamlit==1.66.1
+scikit-learn==1.6.1
+numpy>=1.26,<3
+pandas>=2.2,<3
+pymatgen>=2024.6,<2027
+plotly>=5.20,<7
+joblib>=1.4,<2
+reportlab>=4.0,<5
